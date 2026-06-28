@@ -344,6 +344,8 @@ let peerAnswers = {};
 let cryptoKey = null;
 let roomId = null;
 let connected = false;
+let currentQ = 0;
+let revealed = {};
 
 function $(id) { return document.getElementById(id); }
 
@@ -610,6 +612,7 @@ function startQuestionnaire() {
   $('setupPhase').classList.add('hidden');
   $('joinPhase').classList.add('hidden');
   $('questionPhase').classList.remove('hidden');
+  currentQ = 0;
   renderQuestion();
 }
 
@@ -617,81 +620,107 @@ function renderQuestion() {
   const area = $('questionArea');
   area.innerHTML = '';
 
-  const totalAnswered = Object.keys(myAnswers).length;
-  const pct = questions.length > 0 ? (totalAnswered / questions.length) * 100 : 0;
-  $('progressFill').style.width = pct + '%';
-
-  if (totalAnswered === questions.length && Object.keys(peerAnswers).length === questions.length) {
+  if (currentQ >= questions.length) {
     showResults();
     return;
   }
 
-  for (let i = 0; i < questions.length; i++) {
-    const div = document.createElement('div');
-    div.className = 'question-card';
+  const pct = (currentQ / questions.length) * 100;
+  $('progressFill').style.width = pct + '%';
 
-    const myAns = myAnswers[i];
-    const peerAns = peerAnswers[i];
-    const bothAnswered = myAns !== undefined && peerAns !== undefined;
+  const i = currentQ;
+  const myAns = myAnswers[i];
+  const peerAns = peerAnswers[i];
+  const bothAnswered = myAns !== undefined && peerAns !== undefined;
 
-    div.innerHTML = `
-      <div class="question-num">Question ${i + 1} of ${questions.length}</div>
-      <div class="question-text">${escHtml(questions[i])}</div>
-    `;
+  const div = document.createElement('div');
+  div.className = 'question-card';
 
-    if (myAns === undefined) {
-      const ta = document.createElement('textarea');
-      ta.className = 'answer-input';
-      ta.placeholder = 'Type your answer...';
-      ta.id = 'ansInput_' + i;
+  div.innerHTML = `
+    <div class="question-num">Question ${i + 1} of ${questions.length}</div>
+    <div class="question-text">${escHtml(questions[i])}</div>
+  `;
 
-      const btn = document.createElement('button');
-      btn.textContent = 'Submit Answer';
-      btn.style.marginTop = '10px';
-      btn.style.width = '100%';
-      btn.onclick = () => submitAnswer(i);
+  if (myAns === undefined) {
+    // Show input for current question
+    const ta = document.createElement('textarea');
+    ta.className = 'answer-input';
+    ta.placeholder = 'Type your answer...';
+    ta.id = 'ansInput_' + i;
 
-      div.appendChild(ta);
-      div.appendChild(btn);
+    const btn = document.createElement('button');
+    btn.textContent = 'Submit Answer';
+    btn.style.marginTop = '10px';
+    btn.style.width = '100%';
+    btn.onclick = () => submitAnswer(i);
 
-      ta.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          submitAnswer(i);
-        }
-      });
+    div.appendChild(ta);
+    div.appendChild(btn);
+
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        submitAnswer(i);
+      }
+    });
+  } else if (!bothAnswered) {
+    // Submitted, waiting for peer
+    const myDiv = document.createElement('div');
+    myDiv.className = 'answer-display you';
+    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
+    div.appendChild(myDiv);
+
+    const badge = document.createElement('div');
+    badge.className = 'waiting-badge';
+    badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
+    div.appendChild(badge);
+  } else if (!revealed[i]) {
+    // Both answered, show reveal button
+    const revealCard = document.createElement('div');
+    revealCard.style.textAlign = 'center';
+    revealCard.style.padding = '20px 0';
+    revealCard.innerHTML = `<p style="color:var(--green);font-size:0.85rem;margin-bottom:12px">Both of you have answered!</p>`;
+
+    const revealBtn = document.createElement('button');
+    revealBtn.textContent = 'Reveal Answers';
+    revealBtn.style.width = '100%';
+    revealBtn.style.padding = '14px 20px';
+    revealBtn.style.fontSize = '1rem';
+    revealBtn.onclick = () => { revealed[i] = true; renderQuestion(); };
+    revealCard.appendChild(revealBtn);
+    div.appendChild(revealCard);
+  } else {
+    // Revealed — show both answers + next button
+    const myDiv = document.createElement('div');
+    myDiv.className = 'answer-display you';
+    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
+    div.appendChild(myDiv);
+
+    const peerDiv = document.createElement('div');
+    peerDiv.className = 'answer-display peer';
+    peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${escHtml(peerAns)}`;
+    div.appendChild(peerDiv);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.style.marginTop = '16px';
+    nextBtn.style.width = '100%';
+    nextBtn.style.padding = '14px 20px';
+    nextBtn.style.fontSize = '1rem';
+
+    if (currentQ < questions.length - 1) {
+      nextBtn.textContent = 'Next Question →';
+      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
     } else {
-      const myDiv = document.createElement('div');
-      myDiv.className = 'answer-display you';
-      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
-      div.appendChild(myDiv);
-
-      if (bothAnswered) {
-        const peerDiv = document.createElement('div');
-        peerDiv.className = 'answer-display peer';
-        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${escHtml(peerAns)}`;
-        div.appendChild(peerDiv);
-      } else {
-        const badge = document.createElement('div');
-        badge.className = 'waiting-badge';
-        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
-        div.appendChild(badge);
-      }
+      nextBtn.textContent = 'See All Results';
+      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
     }
-
-    area.appendChild(div);
+    div.appendChild(nextBtn);
   }
 
-  for (let i = 0; i < questions.length; i++) {
-    if (myAnswers[i] === undefined) {
-      const el = document.getElementById('ansInput_' + i);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.focus();
-      }
-      break;
-    }
-  }
+  area.appendChild(div);
+
+  const inp = document.getElementById('ansInput_' + i);
+  if (inp) inp.focus();
 }
 
 function submitAnswer(index) {
