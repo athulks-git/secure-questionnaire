@@ -568,6 +568,9 @@ function setupConnection(connection) {
   });
 
   conn.on('data', async data => {
+    // Clear any join errors on successful data
+    const joinErr = $('joinError');
+    if (joinErr) joinErr.innerHTML = '';
     let msg;
     try {
       msg = JSON.parse(await decrypt(data));
@@ -677,6 +680,10 @@ function copyLink() {
 }
 
 // --- Guest: Join Room ---
+let retryCount = 0;
+const MAX_RETRIES = 5;
+const RETRY_DELAY = 3000;
+
 async function joinRoom() {
   if (!$('guestName').value.trim()) {
     $('guestName').focus();
@@ -694,29 +701,62 @@ async function joinRoom() {
   role = 'guest';
   myName = $('guestName').value.trim();
   cryptoKey = await deriveKey($('guestPassphrase').value);
+  retryCount = 0;
 
   $('joinBtn').disabled = true;
   $('joinBtn').textContent = 'Connecting...';
+  $('joinError').innerHTML = '';
   setStatus('connecting', 'Connecting to room...');
+
+  attemptConnection();
+}
+
+function attemptConnection() {
+  if (peer) { peer.destroy(); }
 
   peer = new Peer();
 
   peer.on('open', () => {
     const hostPeerId = 'sq-' + roomId;
     const connection = peer.connect(hostPeerId, { reliable: true });
-    setupConnection(connection);
+
+    connection.on('open', () => {
+      retryCount = MAX_RETRIES;
+      setupConnection(connection);
+      conn = connection;
+      setStatus('connected', 'Connected! Exchanging info...');
+      sendMsg({ type: 'hello', name: myName });
+    });
+
+    connection.on('error', err => {
+      retryOrFail('Connection error: ' + err.message);
+    });
   });
 
   peer.on('error', err => {
+    if (err.type === 'peer-unavailable') {
+      retryOrFail(null);
+    } else {
+      $('joinBtn').disabled = false;
+      $('joinBtn').textContent = 'Join Session';
+      $('joinError').innerHTML = `<div class="error-box">Error: ${escHtml(err.message)}</div>`;
+      setStatus('disconnected', 'Connection failed');
+    }
+  });
+}
+
+function retryOrFail(errorMsg) {
+  retryCount++;
+  if (retryCount < MAX_RETRIES) {
+    setStatus('connecting', `Room not ready, retrying (${retryCount}/${MAX_RETRIES})...`);
+    $('joinError').innerHTML = `<div class="info-box">Looking for room... Attempt ${retryCount + 1} of ${MAX_RETRIES}. Make sure the host has created the room.</div>`;
+    setTimeout(attemptConnection, RETRY_DELAY);
+  } else {
     $('joinBtn').disabled = false;
     $('joinBtn').textContent = 'Join Session';
-    if (err.type === 'peer-unavailable') {
-      $('joinError').innerHTML = '<div class="error-box">Room not found. The host may not have created the room yet, or the code is wrong.</div>';
-    } else {
-      $('joinError').innerHTML = `<div class="error-box">Error: ${escHtml(err.message)}</div>`;
-    }
+    $('joinError').innerHTML = '<div class="error-box">Could not find the room after multiple attempts. Make sure the host has the room open, then try again.</div>';
     setStatus('disconnected', 'Connection failed');
-  });
+  }
 }
 
 // --- Questionnaire ---
