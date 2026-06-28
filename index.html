@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Questionnaire</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3a;
+    --accent: #6c5ce7;
+    --accent-dim: #5a4bd4;
+    --text: #e8e8f0;
+    --text-dim: #8888a0;
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-top: 6px;
+  }
+
+  .shield {
+    display: inline-block;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 0.82rem;
+    border: 1px solid var(--border);
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    flex-shrink: 0;
+  }
+
+  .status-dot.connected { background: var(--green); }
+  .status-dot.connecting { background: var(--orange); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h2 .step {
+    background: var(--accent);
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .card p {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  input[type="text"], input[type="password"], textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  button {
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-family: inherit;
+  }
+
+  button:hover { background: var(--accent-dim); }
+  button:active { transform: scale(0.98); }
+
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  button.secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  button.secondary:hover {
+    background: var(--border);
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btn-row button { flex: 1; }
+
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .file-drop:hover, .file-drop.dragover {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.05);
+  }
+
+  .file-drop input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-drop .icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .file-drop .label { font-size: 0.85rem; color: var(--text-dim); }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .question-num {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .question-text {
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .answer-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.2s;
+  }
+
+  .answer-input:focus { border-color: var(--accent); }
+
+  .answer-display {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-top: 10px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .answer-display .who {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .answer-display.you .who { color: var(--accent); }
+  .answer-display.peer .who { color: var(--green); }
+
+  .waiting-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(243, 156, 18, 0.1);
+    border: 1px solid rgba(243, 156, 18, 0.2);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--orange);
+    margin-top: 10px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .progress-bar .fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .results-section {
+    margin-top: 8px;
+  }
+
+  .result-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .result-item .q {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tag.e2e {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--green);
+  }
+
+  .hidden { display: none !important; }
+
+  .name-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .name-row input { flex: 1; }
+
+  .copy-feedback {
+    font-size: 0.78rem;
+    color: var(--green);
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .copy-feedback.show { opacity: 1; }
+
+  .role-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .role-tab {
+    flex: 1;
+    padding: 14px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .role-tab:hover { border-color: var(--accent); }
+
+  .role-tab.active {
+    border-color: var(--accent);
+    background: rgba(108, 92, 231, 0.1);
+  }
+
+  .role-tab .role-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .role-tab .role-name { font-size: 0.85rem; font-weight: 600; }
+  .role-tab .role-desc { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+
+  .passphrase-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .passphrase-row input { flex: 1; }
+
+  .passphrase-row button {
+    padding: 10px 14px;
+    flex-shrink: 0;
+  }
+
+  .info-box {
+    padding: 12px 16px;
+    background: rgba(108, 92, 231, 0.08);
+    border: 1px solid rgba(108, 92, 231, 0.2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 12px; }
+    header h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="shield">&#128274;</div>
+    <h1>Secure Questionnaire</h1>
+    <p>End-to-end encrypted &middot; Peer-to-peer &middot; No server</p>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Not connected</span>
+    <span style="margin-left:auto" class="tag e2e" id="e2eTag" style="display:none">E2E Encrypted</span>
+  </div>
+
+  <!-- PHASE 1: Setup -->
+  <div id="setupPhase">
+    <div class="card">
+      <h2><span class="step">1</span> Your Name</h2>
+      <input type="text" id="userName" placeholder="Enter your display name" maxlength="30">
+    </div>
+
+    <div class="card">
+      <h2><span class="step">2</span> Shared Passphrase</h2>
+      <p>Both participants must use the same passphrase. This encrypts all messages beyond the WebRTC layer.</p>
+      <div class="passphrase-row">
+        <input type="password" id="passphrase" placeholder="Enter a shared secret passphrase">
+        <button onclick="togglePassVis()" class="secondary" id="passToggle">Show</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="step">3</span> Choose Your Role</h2>
+      <p>One person creates the room, the other joins it.</p>
+      <div class="role-tabs">
+        <div class="role-tab" onclick="selectRole('host')" id="roleHost">
+          <div class="role-icon">&#128386;</div>
+          <div class="role-name">Create Room</div>
+          <div class="role-desc">Generate an invite code</div>
+        </div>
+        <div class="role-tab" onclick="selectRole('guest')" id="roleGuest">
+          <div class="role-icon">&#128279;</div>
+          <div class="role-name">Join Room</div>
+          <div class="role-desc">Paste an invite code</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Host: generate offer -->
+    <div class="card hidden" id="hostSetup">
+      <h2><span class="step">4</span> Upload Questionnaire</h2>
+      <p>Upload a text file with numbered questions (e.g. "1. What is your name?"). One question per line.</p>
+      <div class="file-drop" id="fileDrop">
+        <input type="file" accept=".txt,.text" id="fileInput">
+        <div class="icon">&#128196;</div>
+        <div class="label">Drop a .txt file here or click to browse</div>
+      </div>
+      <div id="filePreview" class="hidden" style="margin-top:12px">
+        <p id="fileInfo" style="color:var(--green)"></p>
+      </div>
+      <div class="btn-row">
+        <button onclick="createOffer()" id="createBtn" disabled>Create Room</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="hostOffer">
+      <h2><span class="step">5</span> Share This Invite Code</h2>
+      <p>Copy this code and send it to the other person through any channel (message, email, etc).</p>
+      <textarea id="offerText" readonly rows="4"></textarea>
+      <div class="btn-row">
+        <button onclick="copyOffer()">Copy Code</button>
+      </div>
+      <div class="copy-feedback" id="copyOfferFb">Copied to clipboard!</div>
+    </div>
+
+    <div class="card hidden" id="hostAnswer">
+      <h2><span class="step">6</span> Paste Their Response Code</h2>
+      <p>The other person will give you a response code. Paste it below.</p>
+      <textarea id="answerText" rows="4" placeholder="Paste the response code here..."></textarea>
+      <div class="btn-row">
+        <button onclick="acceptAnswer()">Connect</button>
+      </div>
+    </div>
+
+    <!-- Guest: paste offer, generate answer -->
+    <div class="card hidden" id="guestSetup">
+      <h2><span class="step">4</span> Paste Invite Code</h2>
+      <p>Paste the invite code you received from the room creator.</p>
+      <textarea id="guestOfferText" rows="4" placeholder="Paste the invite code here..."></textarea>
+      <div class="btn-row">
+        <button onclick="joinRoom()">Join</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="guestAnswer">
+      <h2><span class="step">5</span> Share This Response Code</h2>
+      <p>Copy this code and send it back to the room creator.</p>
+      <textarea id="guestAnswerText" readonly rows="4"></textarea>
+      <div class="btn-row">
+        <button onclick="copyGuestAnswer()">Copy Code</button>
+      </div>
+      <div class="copy-feedback" id="copyGuestFb">Copied to clipboard!</div>
+      <div class="info-box">Waiting for connection... The host will paste your code on their side.</div>
+    </div>
+  </div>
+
+  <!-- PHASE 2: Questionnaire -->
+  <div id="questionPhase" class="hidden">
+    <div class="progress-bar">
+      <div class="fill" id="progressFill" style="width:0%"></div>
+    </div>
+
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- PHASE 3: Results -->
+  <div id="resultsPhase" class="hidden">
+    <div class="card">
+      <h2>&#9989; All Questions Completed</h2>
+      <p>Here's a summary of all answers from both participants.</p>
+    </div>
+    <div class="results-section" id="resultsArea"></div>
+  </div>
+</div>
+
+<script>
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' }
+];
+
+let pc = null;
+let dc = null;
+let role = null;
+let myName = '';
+let peerName = '';
+let questions = [];
+let currentQ = 0;
+let myAnswers = {};
+let peerAnswers = {};
+let cryptoKey = null;
+
+function $(id) { return document.getElementById(id); }
+
+function togglePassVis() {
+  const inp = $('passphrase');
+  const btn = $('passToggle');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = 'Hide';
+  } else {
+    inp.type = 'password';
+    btn.textContent = 'Show';
+  }
+}
+
+function selectRole(r) {
+  if (!$('userName').value.trim()) {
+    $('userName').focus();
+    $('userName').style.borderColor = 'var(--red)';
+    setTimeout(() => $('userName').style.borderColor = '', 1500);
+    return;
+  }
+  if (!$('passphrase').value.trim()) {
+    $('passphrase').focus();
+    $('passphrase').style.borderColor = 'var(--red)';
+    setTimeout(() => $('passphrase').style.borderColor = '', 1500);
+    return;
+  }
+
+  role = r;
+  $('roleHost').classList.toggle('active', r === 'host');
+  $('roleGuest').classList.toggle('active', r === 'guest');
+  $('hostSetup').classList.toggle('hidden', r !== 'host');
+  $('guestSetup').classList.toggle('hidden', r !== 'guest');
+  $('hostOffer').classList.add('hidden');
+  $('hostAnswer').classList.add('hidden');
+  $('guestAnswer').classList.add('hidden');
+}
+
+// File handling
+const fileDrop = $('fileDrop');
+const fileInput = $('fileInput');
+
+fileDrop.addEventListener('dragover', e => {
+  e.preventDefault();
+  fileDrop.classList.add('dragover');
+});
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+fileDrop.addEventListener('drop', e => {
+  e.preventDefault();
+  fileDrop.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    questions = parseQuestions(text);
+    if (questions.length === 0) {
+      $('fileInfo').textContent = 'No questions found. Use numbered lines like "1. Question text"';
+      $('fileInfo').style.color = 'var(--red)';
+      $('filePreview').classList.remove('hidden');
+      $('createBtn').disabled = true;
+      return;
+    }
+    $('fileInfo').textContent = `${questions.length} question${questions.length > 1 ? 's' : ''} loaded from "${file.name}"`;
+    $('fileInfo').style.color = 'var(--green)';
+    $('filePreview').classList.remove('hidden');
+    $('createBtn').disabled = false;
+  };
+  reader.readAsText(file);
+}
+
+function parseQuestions(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const qs = [];
+  for (const line of lines) {
+    const match = line.match(/^\d+[\.\)\-\:]\s*(.+)/);
+    if (match) qs.push(match[1].trim());
+  }
+  return qs;
+}
+
+// Crypto
+async function deriveKey(passphrase) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v1'), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encrypt(text) {
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(text));
+  const buf = new Uint8Array(iv.length + ct.byteLength);
+  buf.set(iv);
+  buf.set(new Uint8Array(ct), iv.length);
+  return btoa(String.fromCharCode(...buf));
+}
+
+async function decrypt(b64) {
+  const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const iv = raw.slice(0, 12);
+  const ct = raw.slice(12);
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ct);
+  return new TextDecoder().decode(pt);
+}
+
+function sendMsg(obj) {
+  if (dc && dc.readyState === 'open') {
+    encrypt(JSON.stringify(obj)).then(enc => dc.send(enc));
+  }
+}
+
+// Compress SDP for shorter codes
+function compressSDP(sdp) {
+  return btoa(JSON.stringify(sdp));
+}
+
+function decompressSDP(str) {
+  return JSON.parse(atob(str));
+}
+
+// WebRTC
+function setupPC() {
+  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+  pc.oniceconnectionstatechange = () => {
+    const state = pc.iceConnectionState;
+    if (state === 'connected' || state === 'completed') {
+      setStatus('connected', `Connected to ${peerName || 'peer'}`);
+      $('e2eTag').style.display = '';
+    } else if (state === 'disconnected' || state === 'failed') {
+      setStatus('disconnected', 'Connection lost');
+    }
+  };
+}
+
+function setupDC(channel) {
+  dc = channel;
+  dc.onopen = () => {
+    myName = $('userName').value.trim();
+    sendMsg({ type: 'hello', name: myName });
+
+    if (role === 'host') {
+      sendMsg({ type: 'questions', questions });
+    }
+  };
+
+  dc.onmessage = async e => {
+    let msg;
+    try {
+      msg = JSON.parse(await decrypt(e.data));
+    } catch {
+      return;
+    }
+
+    if (msg.type === 'hello') {
+      peerName = msg.name;
+      setStatus('connected', `Connected to ${peerName}`);
+      $('e2eTag').style.display = '';
+    }
+
+    if (msg.type === 'questions') {
+      questions = msg.questions;
+      startQuestionnaire();
+    }
+
+    if (msg.type === 'answer') {
+      peerAnswers[msg.index] = msg.answer;
+      renderQuestion();
+    }
+  };
+
+  dc.onclose = () => setStatus('disconnected', 'Disconnected');
+}
+
+function setStatus(state, text) {
+  const dot = $('statusDot');
+  dot.className = 'status-dot';
+  if (state === 'connected') dot.classList.add('connected');
+  else if (state === 'connecting') dot.classList.add('connecting');
+  $('statusText').textContent = text;
+}
+
+async function createOffer() {
+  if (questions.length === 0) return;
+  cryptoKey = await deriveKey($('passphrase').value);
+  myName = $('userName').value.trim();
+  setupPC();
+
+  const channel = pc.createDataChannel('questionnaire');
+  setupDC(channel);
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await new Promise(resolve => {
+    pc.onicecandidate = e => { if (!e.candidate) resolve(); };
+  });
+
+  setStatus('connecting', 'Waiting for peer...');
+  $('offerText').value = compressSDP(pc.localDescription);
+  $('hostSetup').classList.add('hidden');
+  $('hostOffer').classList.remove('hidden');
+  $('hostAnswer').classList.remove('hidden');
+}
+
+function copyOffer() {
+  navigator.clipboard.writeText($('offerText').value);
+  const fb = $('copyOfferFb');
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 2000);
+}
+
+async function acceptAnswer() {
+  const answerStr = $('answerText').value.trim();
+  if (!answerStr) return;
+  const answer = decompressSDP(answerStr);
+  await pc.setRemoteDescription(new RTCSessionDescription(answer));
+}
+
+async function joinRoom() {
+  const offerStr = $('guestOfferText').value.trim();
+  if (!offerStr) return;
+
+  cryptoKey = await deriveKey($('passphrase').value);
+  myName = $('userName').value.trim();
+  setupPC();
+
+  pc.ondatachannel = e => {
+    setupDC(e.channel);
+  };
+
+  const offer = decompressSDP(offerStr);
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await new Promise(resolve => {
+    pc.onicecandidate = e => { if (!e.candidate) resolve(); };
+  });
+
+  setStatus('connecting', 'Connecting...');
+  $('guestSetup').classList.add('hidden');
+  $('guestAnswer').classList.remove('hidden');
+  $('guestAnswerText').value = compressSDP(pc.localDescription);
+}
+
+function copyGuestAnswer() {
+  navigator.clipboard.writeText($('guestAnswerText').value);
+  const fb = $('copyGuestFb');
+  fb.classList.add('show');
+  setTimeout(() => fb.classList.remove('show'), 2000);
+}
+
+function startQuestionnaire() {
+  $('setupPhase').classList.add('hidden');
+  $('questionPhase').classList.remove('hidden');
+  currentQ = 0;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const area = $('questionArea');
+  area.innerHTML = '';
+
+  const totalAnswered = Object.keys(myAnswers).length;
+  const pct = questions.length > 0 ? (totalAnswered / questions.length) * 100 : 0;
+  $('progressFill').style.width = pct + '%';
+
+  if (totalAnswered === questions.length && Object.keys(peerAnswers).length === questions.length) {
+    showResults();
+    return;
+  }
+
+  for (let i = 0; i < questions.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'question-card';
+
+    const myAns = myAnswers[i];
+    const peerAns = peerAnswers[i];
+    const bothAnswered = myAns !== undefined && peerAns !== undefined;
+
+    div.innerHTML = `
+      <div class="question-num">Question ${i + 1} of ${questions.length}</div>
+      <div class="question-text">${escHtml(questions[i])}</div>
+    `;
+
+    if (myAns === undefined) {
+      const ta = document.createElement('textarea');
+      ta.className = 'answer-input';
+      ta.placeholder = 'Type your answer...';
+      ta.id = 'ansInput_' + i;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Submit Answer';
+      btn.style.marginTop = '10px';
+      btn.style.width = '100%';
+      btn.onclick = () => submitAnswer(i);
+
+      div.appendChild(ta);
+      div.appendChild(btn);
+
+      ta.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitAnswer(i);
+        }
+      });
+    } else {
+      const myDiv = document.createElement('div');
+      myDiv.className = 'answer-display you';
+      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
+      div.appendChild(myDiv);
+
+      if (bothAnswered) {
+        const peerDiv = document.createElement('div');
+        peerDiv.className = 'answer-display peer';
+        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${escHtml(peerAns)}`;
+        div.appendChild(peerDiv);
+      } else {
+        const badge = document.createElement('div');
+        badge.className = 'waiting-badge';
+        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
+        div.appendChild(badge);
+      }
+    }
+
+    area.appendChild(div);
+  }
+
+  // Scroll to first unanswered
+  for (let i = 0; i < questions.length; i++) {
+    if (myAnswers[i] === undefined) {
+      const el = document.getElementById('ansInput_' + i);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus();
+      }
+      break;
+    }
+  }
+}
+
+function submitAnswer(index) {
+  const input = document.getElementById('ansInput_' + index);
+  if (!input) return;
+  const answer = input.value.trim();
+  if (!answer) return;
+
+  myAnswers[index] = answer;
+  sendMsg({ type: 'answer', index, answer });
+  renderQuestion();
+}
+
+function showResults() {
+  $('questionPhase').classList.add('hidden');
+  $('resultsPhase').classList.remove('hidden');
+
+  const area = $('resultsArea');
+  area.innerHTML = '';
+
+  for (let i = 0; i < questions.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `
+      <div class="q">${i + 1}. ${escHtml(questions[i])}</div>
+      <div class="answer-display you">
+        <div class="who">You (${escHtml(myName)})</div>
+        ${escHtml(myAnswers[i] || '—')}
+      </div>
+      <div class="answer-display peer">
+        <div class="who">${escHtml(peerName)}</div>
+        ${escHtml(peerAnswers[i] || '—')}
+      </div>
+    `;
+    area.appendChild(div);
+  }
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
