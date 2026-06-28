@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Secure Questionnaire</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.4/dist/mqtt.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -34,51 +34,34 @@
   }
 
   .container {
-    width: 100%;
-    max-width: 640px;
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+    width: 100%; max-width: 640px; padding: 20px;
+    flex: 1; display: flex; flex-direction: column;
   }
 
-  header {
-    text-align: center;
-    padding: 30px 0 20px;
-  }
-
+  header { text-align: center; padding: 30px 0 20px; }
   header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
   header p { color: var(--text-dim); font-size: 0.85rem; margin-top: 6px; }
   .shield { display: inline-block; font-size: 2rem; margin-bottom: 8px; }
 
   .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: var(--surface);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
-    font-size: 0.82rem;
-    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; background: var(--surface);
+    border-radius: var(--radius); margin-bottom: 16px;
+    font-size: 0.82rem; border: 1px solid var(--border);
   }
 
   .status-dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--red); flex-shrink: 0;
   }
-
   .status-dot.connected { background: var(--green); }
   .status-dot.connecting { background: var(--orange); animation: pulse 1s infinite; }
 
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
   }
 
   .card h2 {
@@ -93,118 +76,67 @@
     font-size: 0.75rem; flex-shrink: 0;
   }
 
-  .card p {
-    font-size: 0.82rem; color: var(--text-dim);
-    margin-bottom: 12px; line-height: 1.5;
-  }
+  .card p { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
 
   input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 0.85rem;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s;
+    width: 100%; padding: 10px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 0.85rem; font-family: inherit;
+    outline: none; transition: border-color 0.2s;
   }
-
   input:focus { border-color: var(--accent); }
 
   button {
-    padding: 10px 20px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    font-family: inherit;
+    padding: 10px 20px; background: var(--accent); color: white;
+    border: none; border-radius: 8px; font-size: 0.85rem;
+    font-weight: 600; cursor: pointer;
+    transition: background 0.2s, transform 0.1s; font-family: inherit;
   }
-
   button:hover { background: var(--accent-dim); }
   button:active { transform: scale(0.98); }
   button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  button.secondary {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-  }
+  button.secondary { background: var(--surface2); border: 1px solid var(--border); }
   button.secondary:hover { background: var(--border); }
 
   .btn-row { display: flex; gap: 8px; margin-top: 12px; }
   .btn-row button { flex: 1; }
 
   .file-drop {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 30px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 30px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; position: relative;
   }
-
   .file-drop:hover, .file-drop.dragover {
-    border-color: var(--accent);
-    background: rgba(108, 92, 231, 0.05);
+    border-color: var(--accent); background: rgba(108, 92, 231, 0.05);
   }
-
-  .file-drop input {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer;
-  }
-
+  .file-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .file-drop .icon { font-size: 1.8rem; margin-bottom: 8px; }
   .file-drop .label { font-size: 0.85rem; color: var(--text-dim); }
 
   .question-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
   }
-
   .question-num {
     font-size: 0.75rem; color: var(--accent); font-weight: 600;
     text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
   }
-
-  .question-text {
-    font-size: 1.05rem; font-weight: 500;
-    line-height: 1.5; margin-bottom: 16px;
-  }
+  .question-text { font-size: 1.05rem; font-weight: 500; line-height: 1.5; margin-bottom: 16px; }
 
   .answer-input {
-    width: 100%;
-    padding: 12px 16px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 0.9rem;
-    font-family: inherit;
-    outline: none;
-    resize: vertical;
-    min-height: 60px;
+    width: 100%; padding: 12px 16px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 0.9rem; font-family: inherit;
+    outline: none; resize: vertical; min-height: 60px;
     transition: border-color 0.2s;
   }
-
   .answer-input:focus { border-color: var(--accent); }
 
   .answer-display {
-    padding: 12px 16px;
-    background: var(--surface2);
-    border-radius: 8px;
-    margin-top: 10px;
-    font-size: 0.88rem;
-    line-height: 1.5;
+    padding: 12px 16px; background: var(--surface2);
+    border-radius: 8px; margin-top: 10px; font-size: 0.88rem; line-height: 1.5;
   }
-
   .answer-display .who { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
   .answer-display.you .who { color: var(--accent); }
   .answer-display.peer .who { color: var(--green); }
@@ -212,76 +144,48 @@
   .waiting-badge {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px;
-    background: rgba(243, 156, 18, 0.1);
-    border: 1px solid rgba(243, 156, 18, 0.2);
-    border-radius: 20px;
-    font-size: 0.78rem; color: var(--orange);
-    margin-top: 10px;
+    background: rgba(243, 156, 18, 0.1); border: 1px solid rgba(243, 156, 18, 0.2);
+    border-radius: 20px; font-size: 0.78rem; color: var(--orange); margin-top: 10px;
   }
 
   .progress-bar {
-    width: 100%; height: 4px;
-    background: var(--surface2);
-    border-radius: 2px;
-    margin-bottom: 16px;
-    overflow: hidden;
+    width: 100%; height: 4px; background: var(--surface2);
+    border-radius: 2px; margin-bottom: 16px; overflow: hidden;
   }
-
   .progress-bar .fill {
     height: 100%; background: var(--accent);
     border-radius: 2px; transition: width 0.4s ease;
   }
 
   .results-section { margin-top: 8px; }
-
   .result-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
   }
-
   .result-item .q { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
 
   .tag {
     display: inline-block; padding: 2px 8px; border-radius: 4px;
-    font-size: 0.7rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.5px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
   }
   .tag.e2e { background: rgba(46, 204, 113, 0.15); color: var(--green); }
 
   .hidden { display: none !important; }
 
-  .share-link-box {
-    display: flex; gap: 8px; align-items: center;
-    margin-top: 12px;
-  }
-
+  .share-link-box { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
   .share-link-box input {
-    flex: 1;
-    padding: 10px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 0.82rem;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    outline: none;
+    flex: 1; padding: 10px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 0.82rem;
+    font-family: 'SF Mono', 'Fira Code', monospace; outline: none;
   }
 
   .room-code {
     font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 1.8rem;
-    font-weight: 700;
-    letter-spacing: 4px;
-    text-align: center;
-    color: var(--accent);
-    padding: 16px;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    margin: 12px 0;
-    user-select: all;
+    font-size: 1.8rem; font-weight: 700; letter-spacing: 4px;
+    text-align: center; color: var(--accent);
+    padding: 16px; background: var(--surface2);
+    border-radius: var(--radius); margin: 12px 0; user-select: all;
   }
 
   .copy-feedback {
@@ -290,36 +194,35 @@
   }
   .copy-feedback.show { opacity: 1; }
 
-  .passphrase-row {
-    display: flex; gap: 8px; align-items: center;
-  }
+  .passphrase-row { display: flex; gap: 8px; align-items: center; }
   .passphrase-row input { flex: 1; }
   .passphrase-row button { padding: 10px 14px; flex-shrink: 0; }
 
   .info-box {
     padding: 12px 16px;
-    background: rgba(108, 92, 231, 0.08);
-    border: 1px solid rgba(108, 92, 231, 0.2);
-    border-radius: 8px;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    line-height: 1.5;
-    margin-top: 12px;
+    background: rgba(108, 92, 231, 0.08); border: 1px solid rgba(108, 92, 231, 0.2);
+    border-radius: 8px; font-size: 0.8rem; color: var(--text-dim);
+    line-height: 1.5; margin-top: 12px;
   }
 
   .error-box {
     padding: 12px 16px;
-    background: rgba(231, 76, 60, 0.08);
-    border: 1px solid rgba(231, 76, 60, 0.2);
-    border-radius: 8px;
-    font-size: 0.8rem;
-    color: var(--red);
-    line-height: 1.5;
-    margin-top: 12px;
+    background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.2);
+    border-radius: 8px; font-size: 0.8rem; color: var(--red);
+    line-height: 1.5; margin-top: 12px;
   }
 
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
+
+  .debug-log {
+    margin-top: 8px; padding: 10px 14px;
+    background: var(--surface2); border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.72rem; color: var(--text-dim);
+    max-height: 120px; overflow-y: auto;
+    line-height: 1.6;
+  }
 
   @media (max-width: 480px) {
     .container { padding: 12px; }
@@ -333,7 +236,7 @@
   <header>
     <div class="shield">&#128274;</div>
     <h1>Secure Questionnaire</h1>
-    <p>End-to-end encrypted &middot; Peer-to-peer &middot; No server</p>
+    <p>End-to-end encrypted &middot; No server sees your data</p>
   </header>
 
   <div class="status-bar">
@@ -342,7 +245,7 @@
     <span style="margin-left:auto" class="tag e2e" id="e2eTag" style="display:none">E2E Encrypted</span>
   </div>
 
-  <!-- PHASE 1A: Host setup (no room in URL) -->
+  <!-- HOST SETUP -->
   <div id="setupPhase">
     <div class="card">
       <h2><span class="step">1</span> Your Name</h2>
@@ -351,10 +254,10 @@
 
     <div class="card">
       <h2><span class="step">2</span> Shared Passphrase</h2>
-      <p>Both participants must use the same passphrase. Share it separately (in person, call, or message).</p>
+      <p>Both participants must use the same passphrase. Share it separately (call, message, in person).</p>
       <div class="passphrase-row">
         <input type="password" id="passphrase" placeholder="Enter a shared secret passphrase">
-        <button onclick="togglePassVis()" class="secondary" id="passToggle">Show</button>
+        <button onclick="toggleVis('passphrase','passToggle')" class="secondary" id="passToggle">Show</button>
       </div>
     </div>
 
@@ -374,7 +277,6 @@
       </div>
     </div>
 
-    <!-- After room is created -->
     <div class="card hidden" id="shareCard">
       <h2>&#127881; Room Created!</h2>
       <p>Share this link with the other person. They just need to open it and enter the passphrase.</p>
@@ -385,7 +287,7 @@
       <div class="copy-feedback" id="copyLinkFb">Copied to clipboard!</div>
       <p style="margin-top:12px; margin-bottom:0">Or share the room code:</p>
       <div class="room-code" id="roomCodeDisplay"></div>
-      <div class="info-box">
+      <div class="info-box" id="hostWaiting">
         <span class="status-dot connecting" style="display:inline-block;vertical-align:middle;margin-right:6px"></span>
         Waiting for the other person to join...
       </div>
@@ -393,16 +295,16 @@
     <div id="errorArea"></div>
   </div>
 
-  <!-- PHASE 1B: Guest join (room in URL) -->
+  <!-- GUEST JOIN -->
   <div id="joinPhase" class="hidden">
     <div class="card join-view">
       <div class="join-icon">&#128279;</div>
       <h2 style="justify-content:center">You've been invited!</h2>
-      <p style="text-align:center">Enter your name and the shared passphrase to join the questionnaire session.</p>
+      <p style="text-align:center">Enter your name and the shared passphrase to join.</p>
       <input type="text" id="guestName" placeholder="Enter your display name" maxlength="30" style="margin-bottom:10px">
       <div class="passphrase-row">
         <input type="password" id="guestPassphrase" placeholder="Enter the shared passphrase">
-        <button onclick="toggleGuestPassVis()" class="secondary" id="guestPassToggle">Show</button>
+        <button onclick="toggleVis('guestPassphrase','guestPassToggle')" class="secondary" id="guestPassToggle">Show</button>
       </div>
       <div class="btn-row">
         <button onclick="joinRoom()" id="joinBtn">Join Session</button>
@@ -411,7 +313,7 @@
     </div>
   </div>
 
-  <!-- PHASE 2: Questionnaire -->
+  <!-- QUESTIONNAIRE -->
   <div id="questionPhase" class="hidden">
     <div class="progress-bar">
       <div class="fill" id="progressFill" style="width:0%"></div>
@@ -419,7 +321,7 @@
     <div id="questionArea"></div>
   </div>
 
-  <!-- PHASE 3: Results -->
+  <!-- RESULTS -->
   <div id="resultsPhase" class="hidden">
     <div class="card">
       <h2>&#9989; All Questions Completed</h2>
@@ -430,8 +332,9 @@
 </div>
 
 <script>
-let peer = null;
-let conn = null;
+const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
+
+let client = null;
 let role = null;
 let myName = '';
 let peerName = '';
@@ -440,6 +343,7 @@ let myAnswers = {};
 let peerAnswers = {};
 let cryptoKey = null;
 let roomId = null;
+let connected = false;
 
 function $(id) { return document.getElementById(id); }
 
@@ -452,22 +356,21 @@ function generateRoomCode() {
 }
 
 function getRoomFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('room');
+  return new URLSearchParams(window.location.search).get('room');
 }
 
-function togglePassVis() {
-  const inp = $('passphrase');
-  const btn = $('passToggle');
+function toggleVis(inputId, btnId) {
+  const inp = $(inputId);
+  const btn = $(btnId);
   inp.type = inp.type === 'password' ? 'text' : 'password';
   btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
 }
 
-function toggleGuestPassVis() {
-  const inp = $('guestPassphrase');
-  const btn = $('guestPassToggle');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
+function flashField(id) {
+  const el = $(id);
+  el.focus();
+  el.style.borderColor = 'var(--red)';
+  setTimeout(() => el.style.borderColor = '', 1500);
 }
 
 // --- File handling ---
@@ -477,8 +380,7 @@ const fileInput = $('fileInput');
 fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
 fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
 fileDrop.addEventListener('drop', e => {
-  e.preventDefault();
-  fileDrop.classList.remove('dragover');
+  e.preventDefault(); fileDrop.classList.remove('dragover');
   if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
 });
 fileInput.addEventListener('change', e => {
@@ -488,45 +390,33 @@ fileInput.addEventListener('change', e => {
 function handleFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    const text = e.target.result;
-    questions = parseQuestions(text);
+    questions = parseQuestions(e.target.result);
     if (questions.length === 0) {
       $('fileInfo').textContent = 'No questions found. Use numbered lines like "1. Question text"';
       $('fileInfo').style.color = 'var(--red)';
-      $('filePreview').classList.remove('hidden');
-      $('createBtn').disabled = true;
-      return;
+    } else {
+      $('fileInfo').textContent = `${questions.length} question${questions.length > 1 ? 's' : ''} loaded from "${file.name}"`;
+      $('fileInfo').style.color = 'var(--green)';
     }
-    $('fileInfo').textContent = `${questions.length} question${questions.length > 1 ? 's' : ''} loaded from "${file.name}"`;
-    $('fileInfo').style.color = 'var(--green)';
     $('filePreview').classList.remove('hidden');
-    $('createBtn').disabled = false;
+    $('createBtn').disabled = questions.length === 0;
   };
   reader.readAsText(file);
 }
 
 function parseQuestions(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  const qs = [];
-  for (const line of lines) {
-    const match = line.match(/^\d+[\.\)\-\:]\s*(.+)/);
-    if (match) qs.push(match[1].trim());
-  }
-  return qs;
+  return text.split('\n').map(l => l.trim()).filter(Boolean)
+    .map(line => { const m = line.match(/^\d+[\.\)\-\:]\s*(.+)/); return m ? m[1].trim() : null; })
+    .filter(Boolean);
 }
 
-// --- Crypto (AES-256-GCM on top of WebRTC DTLS) ---
+// --- Crypto ---
 async function deriveKey(passphrase) {
   const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
-  );
+  const km = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v1'), iterations: 100000, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
+    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v2'), iterations: 100000, hash: 'SHA-256' },
+    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
 }
 
@@ -548,91 +438,92 @@ async function decrypt(b64) {
   return new TextDecoder().decode(pt);
 }
 
-async function sendMsg(obj) {
-  if (conn && conn.open) {
-    const encrypted = await encrypt(JSON.stringify(obj));
-    conn.send(encrypted);
-  }
+// --- MQTT ---
+function topic(suffix) {
+  return `sq/${roomId}/${suffix}`;
 }
 
-// --- Connection handling ---
-function setupConnection(connection) {
-  conn = connection;
+function connectMQTT() {
+  return new Promise((resolve, reject) => {
+    const clientId = 'sq_' + Math.random().toString(36).slice(2, 10);
+    client = mqtt.connect(BROKER_URL, {
+      clientId,
+      clean: true,
+      connectTimeout: 10000,
+      reconnectPeriod: 3000,
+    });
 
-  conn.on('open', () => {
-    setStatus('connected', 'Connected! Exchanging info...');
-    sendMsg({ type: 'hello', name: myName });
-    if (role === 'host') {
-      sendMsg({ type: 'questions', questions });
-    }
-  });
+    client.on('connect', () => {
+      setStatus('connecting', 'Connected to relay, joining room...');
+      client.subscribe(topic('+'), { qos: 1 }, err => {
+        if (err) { reject(err); return; }
+        resolve();
+      });
+    });
 
-  conn.on('data', async data => {
-    // Clear any join errors on successful data
-    const joinErr = $('joinError');
-    if (joinErr) joinErr.innerHTML = '';
-    let msg;
-    try {
-      msg = JSON.parse(await decrypt(data));
-    } catch {
-      showError('Decryption failed. Make sure both users entered the same passphrase.');
-      return;
-    }
+    client.on('error', err => {
+      reject(err);
+    });
 
-    if (msg.type === 'hello') {
-      peerName = msg.name;
-      setStatus('connected', `Connected to ${peerName}`);
-      $('e2eTag').style.display = '';
-      if (role === 'host' && questions.length > 0) {
-        startQuestionnaire();
+    client.on('message', async (t, message) => {
+      const suffix = t.replace(`sq/${roomId}/`, '');
+      let msg;
+      try {
+        msg = JSON.parse(await decrypt(message.toString()));
+      } catch {
+        return;
       }
-    }
+      handleMessage(suffix, msg);
+    });
 
-    if (msg.type === 'questions') {
-      questions = msg.questions;
-      startQuestionnaire();
-    }
+    client.on('offline', () => {
+      if (connected) setStatus('connecting', 'Reconnecting...');
+    });
 
-    if (msg.type === 'answer') {
+    client.on('reconnect', () => {
+      if (connected) setStatus('connecting', 'Reconnecting...');
+    });
+  });
+}
+
+async function publish(suffix, obj) {
+  if (!client || !client.connected) return;
+  const encrypted = await encrypt(JSON.stringify(obj));
+  client.publish(topic(suffix), encrypted, { qos: 1, retain: suffix === 'room' });
+}
+
+function handleMessage(suffix, msg) {
+  if (suffix === 'room' && role === 'guest' && !connected) {
+    questions = msg.questions;
+    peerName = msg.hostName;
+    connected = true;
+    setStatus('connected', `Connected to ${peerName}`);
+    $('e2eTag').style.display = '';
+    publish('join', { type: 'join', name: myName });
+    startQuestionnaire();
+  }
+
+  if (suffix === 'join' && role === 'host') {
+    peerName = msg.name;
+    connected = true;
+    setStatus('connected', `Connected to ${peerName}`);
+    $('e2eTag').style.display = '';
+    startQuestionnaire();
+  }
+
+  if (suffix === 'answers') {
+    if (msg.from !== myName) {
       peerAnswers[msg.index] = msg.answer;
       renderQuestion();
     }
-  });
-
-  conn.on('close', () => setStatus('disconnected', 'Disconnected'));
-  conn.on('error', err => showError('Connection error: ' + err.message));
-}
-
-function setStatus(state, text) {
-  const dot = $('statusDot');
-  dot.className = 'status-dot';
-  if (state === 'connected') dot.classList.add('connected');
-  else if (state === 'connecting') dot.classList.add('connecting');
-  $('statusText').textContent = text;
-}
-
-function showError(msg) {
-  const area = $('errorArea') || $('joinError');
-  if (area) {
-    area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
   }
 }
 
-// --- Host: Create Room ---
+// --- Host ---
 async function createRoom() {
-  if (questions.length === 0) return;
-  if (!$('userName').value.trim()) {
-    $('userName').focus();
-    $('userName').style.borderColor = 'var(--red)';
-    setTimeout(() => $('userName').style.borderColor = '', 1500);
-    return;
-  }
-  if (!$('passphrase').value.trim()) {
-    $('passphrase').focus();
-    $('passphrase').style.borderColor = 'var(--red)';
-    setTimeout(() => $('passphrase').style.borderColor = '', 1500);
-    return;
-  }
+  if (!questions.length) return;
+  if (!$('userName').value.trim()) { flashField('userName'); return; }
+  if (!$('passphrase').value.trim()) { flashField('passphrase'); return; }
 
   role = 'host';
   myName = $('userName').value.trim();
@@ -641,35 +532,24 @@ async function createRoom() {
 
   $('createBtn').disabled = true;
   $('createBtn').textContent = 'Creating...';
-  setStatus('connecting', 'Creating room...');
+  setStatus('connecting', 'Connecting...');
 
-  const peerId = 'sq-' + roomId;
-  peer = new Peer(peerId);
+  try {
+    await connectMQTT();
+    await publish('room', { type: 'room', questions, hostName: myName });
 
-  peer.on('open', () => {
-    setStatus('connecting', 'Room created. Waiting for peer...');
     $('uploadCard').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
-
     const link = window.location.origin + window.location.pathname + '?room=' + roomId;
     $('shareLink').value = link;
     $('roomCodeDisplay').textContent = roomId;
-  });
-
-  peer.on('connection', connection => {
-    setupConnection(connection);
-  });
-
-  peer.on('error', err => {
+    setStatus('connecting', 'Room created. Waiting for peer...');
+  } catch (err) {
     $('createBtn').disabled = false;
     $('createBtn').textContent = 'Create Room & Get Link';
-    if (err.type === 'unavailable-id') {
-      showError('This room code is already in use. Please try again.');
-    } else {
-      showError('Error: ' + err.message);
-    }
-    setStatus('disconnected', 'Error');
-  });
+    showError('errorArea', 'Failed to connect: ' + err.message);
+    setStatus('disconnected', 'Connection failed');
+  }
 }
 
 function copyLink() {
@@ -679,84 +559,50 @@ function copyLink() {
   setTimeout(() => fb.classList.remove('show'), 2000);
 }
 
-// --- Guest: Join Room ---
-let retryCount = 0;
-const MAX_RETRIES = 5;
-const RETRY_DELAY = 3000;
-
+// --- Guest ---
 async function joinRoom() {
-  if (!$('guestName').value.trim()) {
-    $('guestName').focus();
-    $('guestName').style.borderColor = 'var(--red)';
-    setTimeout(() => $('guestName').style.borderColor = '', 1500);
-    return;
-  }
-  if (!$('guestPassphrase').value.trim()) {
-    $('guestPassphrase').focus();
-    $('guestPassphrase').style.borderColor = 'var(--red)';
-    setTimeout(() => $('guestPassphrase').style.borderColor = '', 1500);
-    return;
-  }
+  if (!$('guestName').value.trim()) { flashField('guestName'); return; }
+  if (!$('guestPassphrase').value.trim()) { flashField('guestPassphrase'); return; }
 
   role = 'guest';
   myName = $('guestName').value.trim();
   cryptoKey = await deriveKey($('guestPassphrase').value);
-  retryCount = 0;
 
   $('joinBtn').disabled = true;
   $('joinBtn').textContent = 'Connecting...';
-  $('joinError').innerHTML = '';
   setStatus('connecting', 'Connecting to room...');
 
-  attemptConnection();
-}
+  try {
+    await connectMQTT();
+    setStatus('connecting', 'Connected to relay, waiting for room data...');
 
-function attemptConnection() {
-  if (peer) { peer.destroy(); }
-
-  peer = new Peer();
-
-  peer.on('open', () => {
-    const hostPeerId = 'sq-' + roomId;
-    const connection = peer.connect(hostPeerId, { reliable: true });
-
-    connection.on('open', () => {
-      retryCount = MAX_RETRIES;
-      setupConnection(connection);
-      conn = connection;
-      setStatus('connected', 'Connected! Exchanging info...');
-      sendMsg({ type: 'hello', name: myName });
-    });
-
-    connection.on('error', err => {
-      retryOrFail('Connection error: ' + err.message);
-    });
-  });
-
-  peer.on('error', err => {
-    if (err.type === 'peer-unavailable') {
-      retryOrFail(null);
-    } else {
-      $('joinBtn').disabled = false;
-      $('joinBtn').textContent = 'Join Session';
-      $('joinError').innerHTML = `<div class="error-box">Error: ${escHtml(err.message)}</div>`;
-      setStatus('disconnected', 'Connection failed');
-    }
-  });
-}
-
-function retryOrFail(errorMsg) {
-  retryCount++;
-  if (retryCount < MAX_RETRIES) {
-    setStatus('connecting', `Room not ready, retrying (${retryCount}/${MAX_RETRIES})...`);
-    $('joinError').innerHTML = `<div class="info-box">Looking for room... Attempt ${retryCount + 1} of ${MAX_RETRIES}. Make sure the host has created the room.</div>`;
-    setTimeout(attemptConnection, RETRY_DELAY);
-  } else {
+    setTimeout(() => {
+      if (!connected) {
+        showError('joinError', 'Room data not received. Make sure the host has the room open and you have the correct passphrase.');
+        $('joinBtn').disabled = false;
+        $('joinBtn').textContent = 'Join Session';
+      }
+    }, 15000);
+  } catch (err) {
     $('joinBtn').disabled = false;
     $('joinBtn').textContent = 'Join Session';
-    $('joinError').innerHTML = '<div class="error-box">Could not find the room after multiple attempts. Make sure the host has the room open, then try again.</div>';
+    showError('joinError', 'Failed to connect: ' + err.message);
     setStatus('disconnected', 'Connection failed');
   }
+}
+
+// --- UI Helpers ---
+function setStatus(state, text) {
+  const dot = $('statusDot');
+  dot.className = 'status-dot';
+  if (state === 'connected') dot.classList.add('connected');
+  else if (state === 'connecting') dot.classList.add('connecting');
+  $('statusText').textContent = text;
+}
+
+function showError(areaId, msg) {
+  const area = $(areaId);
+  if (area) area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
 }
 
 // --- Questionnaire ---
@@ -854,7 +700,7 @@ function submitAnswer(index) {
   const answer = input.value.trim();
   if (!answer) return;
   myAnswers[index] = answer;
-  sendMsg({ type: 'answer', index, answer });
+  publish('answers', { type: 'answer', index, answer, from: myName });
   renderQuestion();
 }
 
@@ -888,7 +734,7 @@ function escHtml(s) {
   return d.innerHTML;
 }
 
-// --- Init: detect if joining or hosting ---
+// --- Init ---
 (function init() {
   roomId = getRoomFromURL();
   if (roomId) {
