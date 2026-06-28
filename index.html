@@ -797,7 +797,7 @@ function renderQuestion() {
       badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
       div.appendChild(badge);
     }
-  } else if (!revealed[i]) {
+  } else if (!revealed[i] && !isAdmin) {
     // Both answered, show reveal button
     const revealCard = document.createElement('div');
     revealCard.style.textAlign = 'center';
