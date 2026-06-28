@@ -625,7 +625,7 @@ function handleMessage(suffix, msg) {
   if (suffix === 'peek' && isAdmin) {
     if (msg.from !== myName) {
       peerPeek[msg.index] = msg.rating;
-      renderQuestion();
+      updatePeekDisplay(msg.index);
     }
   }
 }
@@ -841,8 +841,30 @@ function renderQuestion() {
 
   area.appendChild(div);
 
+  if (isAdmin && peerPeek[i] !== undefined && myAnswers[i] === undefined) {
+    updatePeekDisplay(i);
+  }
+
   const inp = document.getElementById('ansInput_' + i);
   if (inp) inp.focus();
+}
+
+function updatePeekDisplay(index) {
+  if (index !== currentQ) return;
+  const existing = document.getElementById('peekDisplay');
+  const rating = peerPeek[index];
+  if (rating === undefined) { if (existing) existing.remove(); return; }
+  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(rating)}`;
+  if (existing) {
+    existing.innerHTML = html;
+  } else {
+    const peek = document.createElement('div');
+    peek.className = 'peek-box';
+    peek.id = 'peekDisplay';
+    peek.innerHTML = html;
+    const card = document.querySelector('.question-card');
+    if (card) card.appendChild(peek);
+  }
 }
 
 function submitAnswer(index) {
