@@ -618,7 +618,11 @@ function handleMessage(suffix, msg) {
     if (msg.from !== myName) {
       peerAnswers[msg.index] = msg.answer;
       delete peerPeek[msg.index];
-      renderQuestion();
+      if (currentQ >= questions.length) {
+        showResults();
+      } else {
+        renderQuestion();
+      }
     }
   }
 
@@ -788,44 +792,24 @@ function renderQuestion() {
       peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
       div.appendChild(peerDiv);
     }
-  } else if (!bothAnswered) {
+  } else {
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
     myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
     div.appendChild(myDiv);
 
-    if (isAdmin && peerAns !== undefined) {
-      const peerDiv = document.createElement('div');
-      peerDiv.className = 'answer-display peer';
-      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
-      div.appendChild(peerDiv);
-    } else if (isAdmin && peerPeek[i] !== undefined) {
-      const peerDiv = document.createElement('div');
-      peerDiv.className = 'answer-display peer';
-      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(peerPeek[i])}`;
-      div.appendChild(peerDiv);
-    } else {
-      const badge = document.createElement('div');
-      badge.className = 'waiting-badge';
-      badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
-      div.appendChild(badge);
-    }
-  } else {
-    const doneMsg = document.createElement('p');
-    doneMsg.style.cssText = 'color:var(--green);font-size:0.85rem;margin-bottom:12px;text-align:center';
-    doneMsg.textContent = 'Both of you have answered!';
-    div.appendChild(doneMsg);
-
     if (isAdmin) {
-      const myDiv = document.createElement('div');
-      myDiv.className = 'answer-display you';
-      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
-      div.appendChild(myDiv);
-
-      const peerDiv = document.createElement('div');
-      peerDiv.className = 'answer-display peer';
-      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${ratingHtml(peerAns)}`;
-      div.appendChild(peerDiv);
+      if (peerAns !== undefined) {
+        const peerDiv = document.createElement('div');
+        peerDiv.className = 'answer-display peer';
+        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
+        div.appendChild(peerDiv);
+      } else if (peerPeek[i] !== undefined) {
+        const peerDiv = document.createElement('div');
+        peerDiv.className = 'answer-display peer';
+        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(peerPeek[i])}`;
+        div.appendChild(peerDiv);
+      }
     }
 
     const nextBtn = document.createElement('button');
@@ -839,7 +823,7 @@ function renderQuestion() {
       nextBtn.onclick = () => { currentQ++; renderQuestion(); };
     } else {
       nextBtn.textContent = 'See All Results';
-      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
+      nextBtn.onclick = () => showResults();
     }
     div.appendChild(nextBtn);
   }
@@ -886,11 +870,26 @@ function ratingHtml(value) {
   return `<div class="rating-display"><span class="rating-emoji">${r.emoji}</span> ${escHtml(r.label)}</div>`;
 }
 
+function allPeerAnswered() {
+  for (let i = 0; i < questions.length; i++) {
+    if (peerAnswers[i] === undefined) return false;
+  }
+  return true;
+}
+
 function showResults() {
   $('questionPhase').classList.add('hidden');
   $('resultsPhase').classList.remove('hidden');
   const area = $('resultsArea');
   area.innerHTML = '';
+
+  if (!allPeerAnswered()) {
+    const waiting = document.createElement('div');
+    waiting.className = 'card';
+    waiting.innerHTML = `<div class="waiting-badge" style="justify-content:center"><span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to finish all questions...</div>`;
+    area.appendChild(waiting);
+    return;
+  }
 
   for (let i = 0; i < questions.length; i++) {
     const div = document.createElement('div');
