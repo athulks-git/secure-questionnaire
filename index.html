@@ -780,13 +780,26 @@ function renderQuestion() {
 
     div.appendChild(bar);
     div.appendChild(btn);
+
+    if (isAdmin && peerAns !== undefined) {
+      const peerDiv = document.createElement('div');
+      peerDiv.className = 'answer-display peer';
+      peerDiv.style.marginTop = '12px';
+      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
+      div.appendChild(peerDiv);
+    }
   } else if (!bothAnswered) {
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
     myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
     div.appendChild(myDiv);
 
-    if (isAdmin && peerPeek[i] !== undefined) {
+    if (isAdmin && peerAns !== undefined) {
+      const peerDiv = document.createElement('div');
+      peerDiv.className = 'answer-display peer';
+      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
+      div.appendChild(peerDiv);
+    } else if (isAdmin && peerPeek[i] !== undefined) {
       const peerDiv = document.createElement('div');
       peerDiv.className = 'answer-display peer';
       peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(peerPeek[i])}`;
