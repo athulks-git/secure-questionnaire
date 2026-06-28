@@ -277,10 +277,10 @@
     </div>
 
     <div class="card">
-      <h2><span class="step">3</span> Claude API Key</h2>
-      <p>Your key is stored only in your browser and sent directly to Anthropic. Never shared with anyone.</p>
+      <h2><span class="step">3</span> Grok API Key</h2>
+      <p>Your key is stored only in your browser and sent directly to xAI. Never shared with anyone.</p>
       <div class="passphrase-row">
-        <input type="password" id="apiKey" placeholder="sk-ant-..." value="">
+        <input type="password" id="apiKey" placeholder="xai-..." value="">
         <button onclick="toggleVis('apiKey','apiKeyToggle')" class="secondary" id="apiKeyToggle">Show</button>
       </div>
     </div>
@@ -359,8 +359,8 @@
 
 <script>
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-6';
+const GROK_API = 'https://api.x.ai/v1/chat/completions';
+const MODEL = 'grok-3-mini';
 
 let client = null;
 let role = null;
@@ -476,8 +476,8 @@ async function decrypt(b64) {
   return new TextDecoder().decode(pt);
 }
 
-// --- Claude API ---
-async function callClaude(conversationSoFar) {
+// --- Grok API (xAI, OpenAI-compatible) ---
+async function callAI(conversationSoFar) {
   const systemPrompt = `You are a conversation facilitator guiding a structured dialogue between two people. Follow these guidelines strictly:
 
 <guidelines>
@@ -488,7 +488,7 @@ Your job:
 1. Generate ONE question at a time for both participants to answer independently.
 2. Each new question should build on their previous answers and follow the guidelines.
 3. Keep questions open-ended and thought-provoking.
-4. Respond in this exact JSON format:
+4. Respond in this exact JSON format and nothing else:
 {"question": "Your question here", "note": "Brief context for why you're asking this (1 sentence)", "complete": false}
 5. When the conversation has reached a natural conclusion based on the guidelines, respond with:
 {"question": "", "note": "Summary of the conversation", "complete": true}
@@ -507,19 +507,19 @@ Your job:
     userContent += 'Generate the next question based on their answers and the guidelines.';
   }
 
-  const res = await fetch(CLAUDE_API, {
+  const res = await fetch(GROK_API, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 300,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userContent }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userContent },
+      ],
     }),
   });
 
@@ -529,7 +529,7 @@ Your job:
   }
 
   const data = await res.json();
-  const text = data.content[0].text;
+  const text = data.choices[0].message.content;
 
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Invalid AI response format');
@@ -713,7 +713,7 @@ async function generateNextQuestion() {
       peerAnswer: r.peerAnswer,
     }));
 
-    const result = await callClaude(history);
+    const result = await callAI(history);
 
     if (result.complete) {
       isComplete = true;
