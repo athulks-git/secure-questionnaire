@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Secure Questionnaire</title>
 <script src="https://unpkg.com/mqtt@5.10.4/dist/mqtt.min.js"></script>
 <style>
@@ -26,8 +25,12 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg); color: var(--text);
-    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .container {
@@ -121,17 +124,12 @@
   }
   .question-text { font-size: 1.05rem; font-weight: 500; line-height: 1.5; margin-bottom: 16px; }
 
-  .ai-note {
-    font-size: 0.75rem; color: var(--text-dim); font-style: italic;
-    margin-bottom: 12px; padding: 8px 12px;
-    background: rgba(108, 92, 231, 0.06); border-radius: 8px; line-height: 1.5;
-  }
-
   .answer-input {
     width: 100%; padding: 12px 16px; background: var(--surface2);
     border: 1px solid var(--border); border-radius: 8px;
     color: var(--text); font-size: 0.9rem; font-family: inherit;
-    outline: none; resize: vertical; min-height: 60px; transition: border-color 0.2s;
+    outline: none; resize: vertical; min-height: 60px;
+    transition: border-color 0.2s;
   }
   .answer-input:focus { border-color: var(--accent); }
 
@@ -148,13 +146,6 @@
     padding: 6px 12px;
     background: rgba(243, 156, 18, 0.1); border: 1px solid rgba(243, 156, 18, 0.2);
     border-radius: 20px; font-size: 0.78rem; color: var(--orange); margin-top: 10px;
-  }
-
-  .generating-badge {
-    display: flex; align-items: center; gap: 8px;
-    padding: 16px; margin-bottom: 16px;
-    background: rgba(108, 92, 231, 0.08); border: 1px solid rgba(108, 92, 231, 0.15);
-    border-radius: var(--radius); font-size: 0.85rem; color: var(--accent);
   }
 
   .progress-bar {
@@ -210,34 +201,28 @@
   .info-box {
     padding: 12px 16px;
     background: rgba(108, 92, 231, 0.08); border: 1px solid rgba(108, 92, 231, 0.2);
-    border-radius: 8px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; margin-top: 12px;
+    border-radius: 8px; font-size: 0.8rem; color: var(--text-dim);
+    line-height: 1.5; margin-top: 12px;
   }
 
   .error-box {
     padding: 12px 16px;
     background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.2);
-    border-radius: 8px; font-size: 0.8rem; color: var(--red); line-height: 1.5; margin-top: 12px;
+    border-radius: 8px; font-size: 0.8rem; color: var(--red);
+    line-height: 1.5; margin-top: 12px;
   }
 
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
-  .conversation-history {
-    margin-bottom: 16px;
+  .debug-log {
+    margin-top: 8px; padding: 10px 14px;
+    background: var(--surface2); border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.72rem; color: var(--text-dim);
+    max-height: 120px; overflow-y: auto;
+    line-height: 1.6;
   }
-  .conversation-history .past-round {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px; margin-bottom: 10px;
-    opacity: 0.7;
-  }
-  .conversation-history .past-round .q {
-    font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-dim);
-  }
-
-  .complete-card {
-    text-align: center; padding: 30px 20px;
-  }
-  .complete-card .icon { font-size: 3rem; margin-bottom: 12px; }
 
   @media (max-width: 480px) {
     .container { padding: 12px; }
@@ -251,7 +236,7 @@
   <header>
     <div class="shield">&#128274;</div>
     <h1>Secure Questionnaire</h1>
-    <p>AI-guided &middot; End-to-end encrypted &middot; No server sees your data</p>
+    <p>End-to-end encrypted &middot; No server sees your data</p>
   </header>
 
   <div class="status-bar">
@@ -276,22 +261,13 @@
       </div>
     </div>
 
-    <div class="card">
-      <h2><span class="step">3</span> Grok API Key</h2>
-      <p>Your key is stored only in your browser and sent directly to xAI. Never shared with anyone.</p>
-      <div class="passphrase-row">
-        <input type="password" id="apiKey" placeholder="xai-..." value="">
-        <button onclick="toggleVis('apiKey','apiKeyToggle')" class="secondary" id="apiKeyToggle">Show</button>
-      </div>
-    </div>
-
     <div class="card" id="uploadCard">
-      <h2><span class="step">4</span> Upload Guidelines</h2>
-      <p>Upload a text file with guidelines for the AI. It will generate questions based on these guidelines and adapt based on the participants' answers.</p>
+      <h2><span class="step">3</span> Upload Questionnaire</h2>
+      <p>Upload a text file with numbered questions (e.g. "1. What is your name?"). One question per line.</p>
       <div class="file-drop" id="fileDrop">
-        <input type="file" accept=".txt,.text,.md" id="fileInput">
+        <input type="file" accept=".txt,.text" id="fileInput">
         <div class="icon">&#128196;</div>
-        <div class="label">Drop a guidelines file here or click to browse</div>
+        <div class="label">Drop a .txt file here or click to browse</div>
       </div>
       <div id="filePreview" class="hidden" style="margin-top:12px">
         <p id="fileInfo" style="color:var(--green)"></p>
@@ -342,16 +318,14 @@
     <div class="progress-bar">
       <div class="fill" id="progressFill" style="width:0%"></div>
     </div>
-    <div id="conversationHistory" class="conversation-history"></div>
     <div id="questionArea"></div>
   </div>
 
   <!-- RESULTS -->
   <div id="resultsPhase" class="hidden">
-    <div class="card complete-card">
-      <div class="icon">&#9989;</div>
-      <h2 style="justify-content:center">Conversation Complete</h2>
-      <p id="aiSummary" style="text-align:center"></p>
+    <div class="card">
+      <h2>&#9989; All Questions Completed</h2>
+      <p>Here's a summary of all answers from both participants.</p>
     </div>
     <div class="results-section" id="resultsArea"></div>
   </div>
@@ -359,28 +333,19 @@
 
 <script>
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-const GROK_API = 'https://api.x.ai/v1/chat/completions';
-const MODEL = 'grok-3-mini';
 
 let client = null;
 let role = null;
 let myName = '';
 let peerName = '';
-let guidelines = '';
-let apiKey = '';
+let questions = [];
+let myAnswers = {};
+let peerAnswers = {};
 let cryptoKey = null;
 let roomId = null;
 let connected = false;
-
 let currentQ = 0;
-let rounds = [];
-let myAnswers = {};
-let peerAnswers = {};
 let revealed = {};
-let currentQuestion = '';
-let currentAiNote = '';
-let isComplete = false;
-let generating = false;
 
 function $(id) { return document.getElementById(id); }
 
@@ -410,12 +375,6 @@ function flashField(id) {
   setTimeout(() => el.style.borderColor = '', 1500);
 }
 
-// --- Load saved API key ---
-(function loadKey() {
-  const saved = localStorage.getItem('sq_api_key');
-  if (saved) $('apiKey').value = saved;
-})();
-
 // --- File handling ---
 const fileDrop = $('fileDrop');
 const fileInput = $('fileInput');
@@ -433,19 +392,24 @@ fileInput.addEventListener('change', e => {
 function handleFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    guidelines = e.target.result.trim();
-    if (!guidelines) {
-      $('fileInfo').textContent = 'File is empty.';
+    questions = parseQuestions(e.target.result);
+    if (questions.length === 0) {
+      $('fileInfo').textContent = 'No questions found. Use numbered lines like "1. Question text"';
       $('fileInfo').style.color = 'var(--red)';
-      $('createBtn').disabled = true;
     } else {
-      $('fileInfo').textContent = `Guidelines loaded from "${file.name}" (${guidelines.length} chars)`;
+      $('fileInfo').textContent = `${questions.length} question${questions.length > 1 ? 's' : ''} loaded from "${file.name}"`;
       $('fileInfo').style.color = 'var(--green)';
-      $('createBtn').disabled = false;
     }
     $('filePreview').classList.remove('hidden');
+    $('createBtn').disabled = questions.length === 0;
   };
   reader.readAsText(file);
+}
+
+function parseQuestions(text) {
+  return text.split('\n').map(l => l.trim()).filter(Boolean)
+    .map(line => { const m = line.match(/^\d+[\.\)\-\:]\s*(.+)/); return m ? m[1].trim() : null; })
+    .filter(Boolean);
 }
 
 // --- Crypto ---
@@ -453,7 +417,7 @@ async function deriveKey(passphrase) {
   const enc = new TextEncoder();
   const km = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v3'), iterations: 100000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v2'), iterations: 100000, hash: 'SHA-256' },
     km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
 }
@@ -476,68 +440,8 @@ async function decrypt(b64) {
   return new TextDecoder().decode(pt);
 }
 
-// --- Grok API (xAI, OpenAI-compatible) ---
-async function callAI(conversationSoFar) {
-  const systemPrompt = `You are a conversation facilitator guiding a structured dialogue between two people. Follow these guidelines strictly:
-
-<guidelines>
-${guidelines}
-</guidelines>
-
-Your job:
-1. Generate ONE question at a time for both participants to answer independently.
-2. Each new question should build on their previous answers and follow the guidelines.
-3. Keep questions open-ended and thought-provoking.
-4. Respond in this exact JSON format and nothing else:
-{"question": "Your question here", "note": "Brief context for why you're asking this (1 sentence)", "complete": false}
-5. When the conversation has reached a natural conclusion based on the guidelines, respond with:
-{"question": "", "note": "Summary of the conversation", "complete": true}
-6. Aim for 5-10 questions unless the guidelines specify otherwise.`;
-
-  let userContent = '';
-  if (conversationSoFar.length === 0) {
-    userContent = `The two participants are: "${myName}" and "${peerName}". Generate the first question.`;
-  } else {
-    userContent = 'Here is the conversation so far:\n\n';
-    for (const round of conversationSoFar) {
-      userContent += `Question ${round.num}: ${round.question}\n`;
-      userContent += `${myName}'s answer: ${round.myAnswer}\n`;
-      userContent += `${peerName}'s answer: ${round.peerAnswer}\n\n`;
-    }
-    userContent += 'Generate the next question based on their answers and the guidelines.';
-  }
-
-  const res = await fetch(GROK_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 300,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userContent },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`API error (${res.status}): ${err}`);
-  }
-
-  const data = await res.json();
-  const text = data.choices[0].message.content;
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('Invalid AI response format');
-  return JSON.parse(jsonMatch[0]);
-}
-
 // --- MQTT ---
-function mqttTopic(suffix) {
+function topic(suffix) {
   return `sq/${roomId}/${suffix}`;
 }
 
@@ -545,46 +449,60 @@ function connectMQTT() {
   return new Promise((resolve, reject) => {
     const clientId = 'sq_' + Math.random().toString(36).slice(2, 10);
     client = mqtt.connect(BROKER_URL, {
-      clientId, clean: true, connectTimeout: 10000, reconnectPeriod: 3000,
+      clientId,
+      clean: true,
+      connectTimeout: 10000,
+      reconnectPeriod: 3000,
     });
 
     client.on('connect', () => {
       setStatus('connecting', 'Connected to relay, joining room...');
-      client.subscribe(mqttTopic('+'), { qos: 1 }, err => {
+      client.subscribe(topic('+'), { qos: 1 }, err => {
         if (err) { reject(err); return; }
         resolve();
       });
     });
 
-    client.on('error', reject);
+    client.on('error', err => {
+      reject(err);
+    });
 
     client.on('message', async (t, message) => {
       const suffix = t.replace(`sq/${roomId}/`, '');
       let msg;
-      try { msg = JSON.parse(await decrypt(message.toString())); } catch { return; }
+      try {
+        msg = JSON.parse(await decrypt(message.toString()));
+      } catch {
+        return;
+      }
       handleMessage(suffix, msg);
     });
 
-    client.on('offline', () => { if (connected) setStatus('connecting', 'Reconnecting...'); });
-    client.on('reconnect', () => { if (connected) setStatus('connecting', 'Reconnecting...'); });
+    client.on('offline', () => {
+      if (connected) setStatus('connecting', 'Reconnecting...');
+    });
+
+    client.on('reconnect', () => {
+      if (connected) setStatus('connecting', 'Reconnecting...');
+    });
   });
 }
 
 async function publish(suffix, obj) {
   if (!client || !client.connected) return;
   const encrypted = await encrypt(JSON.stringify(obj));
-  client.publish(mqttTopic(suffix), encrypted, { qos: 1, retain: suffix === 'room' });
+  client.publish(topic(suffix), encrypted, { qos: 1, retain: suffix === 'room' });
 }
 
 function handleMessage(suffix, msg) {
   if (suffix === 'room' && role === 'guest' && !connected) {
-    guidelines = msg.guidelines;
+    questions = msg.questions;
     peerName = msg.hostName;
     connected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
     publish('join', { type: 'join', name: myName });
-    startSession();
+    startQuestionnaire();
   }
 
   if (suffix === 'join' && role === 'host') {
@@ -592,38 +510,25 @@ function handleMessage(suffix, msg) {
     connected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
-    startSession();
+    startQuestionnaire();
   }
 
-  if (suffix === 'question') {
-    currentQuestion = msg.question;
-    currentAiNote = msg.note || '';
-    currentQ = msg.num;
-    if (msg.complete) {
-      isComplete = true;
-      showResults();
-    } else {
+  if (suffix === 'answers') {
+    if (msg.from !== myName) {
+      peerAnswers[msg.index] = msg.answer;
       renderQuestion();
     }
-  }
-
-  if (suffix === 'answers' && msg.from !== myName) {
-    peerAnswers[msg.index] = msg.answer;
-    renderQuestion();
   }
 }
 
 // --- Host ---
 async function createRoom() {
-  if (!guidelines) return;
+  if (!questions.length) return;
   if (!$('userName').value.trim()) { flashField('userName'); return; }
   if (!$('passphrase').value.trim()) { flashField('passphrase'); return; }
-  if (!$('apiKey').value.trim()) { flashField('apiKey'); return; }
 
   role = 'host';
   myName = $('userName').value.trim();
-  apiKey = $('apiKey').value.trim();
-  localStorage.setItem('sq_api_key', apiKey);
   cryptoKey = await deriveKey($('passphrase').value);
   roomId = generateRoomCode();
 
@@ -633,7 +538,7 @@ async function createRoom() {
 
   try {
     await connectMQTT();
-    await publish('room', { type: 'room', guidelines, hostName: myName });
+    await publish('room', { type: 'room', questions, hostName: myName });
 
     $('uploadCard').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
@@ -671,10 +576,11 @@ async function joinRoom() {
 
   try {
     await connectMQTT();
-    setStatus('connecting', 'Connected, waiting for room data...');
+    setStatus('connecting', 'Connected to relay, waiting for room data...');
+
     setTimeout(() => {
       if (!connected) {
-        showError('joinError', 'Room not found. Make sure the host has the room open and the passphrase is correct.');
+        showError('joinError', 'Room data not received. Make sure the host has the room open and you have the correct passphrase.');
         $('joinBtn').disabled = false;
         $('joinBtn').textContent = 'Join Session';
       }
@@ -687,101 +593,60 @@ async function joinRoom() {
   }
 }
 
-// --- Session ---
-async function startSession() {
+// --- UI Helpers ---
+function setStatus(state, text) {
+  const dot = $('statusDot');
+  dot.className = 'status-dot';
+  if (state === 'connected') dot.classList.add('connected');
+  else if (state === 'connecting') dot.classList.add('connecting');
+  $('statusText').textContent = text;
+}
+
+function showError(areaId, msg) {
+  const area = $(areaId);
+  if (area) area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
+}
+
+// --- Questionnaire ---
+function startQuestionnaire() {
   $('setupPhase').classList.add('hidden');
   $('joinPhase').classList.add('hidden');
   $('questionPhase').classList.remove('hidden');
-
-  if (role === 'host') {
-    await generateNextQuestion();
-  }
+  currentQ = 0;
+  renderQuestion();
 }
 
-async function generateNextQuestion() {
-  if (generating) return;
-  generating = true;
-
-  const area = $('questionArea');
-  area.innerHTML = '<div class="generating-badge"><span class="status-dot connecting"></span> AI is generating the next question...</div>';
-
-  try {
-    const history = rounds.map((r, idx) => ({
-      num: idx + 1,
-      question: r.question,
-      myAnswer: r.myAnswer,
-      peerAnswer: r.peerAnswer,
-    }));
-
-    const result = await callAI(history);
-
-    if (result.complete) {
-      isComplete = true;
-      currentAiNote = result.note || '';
-      publish('question', { question: '', note: result.note, num: currentQ, complete: true });
-      showResults();
-    } else {
-      currentQ = rounds.length;
-      currentQuestion = result.question;
-      currentAiNote = result.note || '';
-      publish('question', { question: result.question, note: result.note, num: currentQ, complete: false });
-      renderQuestion();
-    }
-  } catch (err) {
-    area.innerHTML = `<div class="error-box">Failed to generate question: ${escHtml(err.message)}</div>
-      <div class="btn-row"><button onclick="generateNextQuestion()">Retry</button></div>`;
-  }
-
-  generating = false;
-}
-
-// --- Render ---
 function renderQuestion() {
-  const histArea = $('conversationHistory');
-  histArea.innerHTML = '';
-  for (let r = 0; r < rounds.length; r++) {
-    const rd = rounds[r];
-    const div = document.createElement('div');
-    div.className = 'past-round';
-    div.innerHTML = `
-      <div class="q">Q${r + 1}: ${escHtml(rd.question)}</div>
-      <div class="answer-display you" style="opacity:0.8">
-        <div class="who">You (${escHtml(myName)})</div>${escHtml(rd.myAnswer)}
-      </div>
-      <div class="answer-display peer" style="opacity:0.8">
-        <div class="who">${escHtml(peerName)}</div>${escHtml(rd.peerAnswer)}
-      </div>
-    `;
-    histArea.appendChild(div);
-  }
-
   const area = $('questionArea');
   area.innerHTML = '';
 
-  if (!currentQuestion) return;
+  if (currentQ >= questions.length) {
+    showResults();
+    return;
+  }
+
+  const pct = (currentQ / questions.length) * 100;
+  $('progressFill').style.width = pct + '%';
 
   const i = currentQ;
   const myAns = myAnswers[i];
   const peerAns = peerAnswers[i];
   const bothAnswered = myAns !== undefined && peerAns !== undefined;
 
-  const pct = rounds.length > 0 ? (rounds.length / (rounds.length + 2)) * 100 : 5;
-  $('progressFill').style.width = Math.min(pct, 95) + '%';
-
   const div = document.createElement('div');
   div.className = 'question-card';
 
   div.innerHTML = `
-    <div class="question-num">Question ${rounds.length + 1}</div>
-    ${currentAiNote ? `<div class="ai-note">${escHtml(currentAiNote)}</div>` : ''}
-    <div class="question-text">${escHtml(currentQuestion)}</div>
+    <div class="question-num">Question ${i + 1} of ${questions.length}</div>
+    <div class="question-text">${escHtml(questions[i])}</div>
   `;
 
   if (myAns === undefined) {
+    // Show input for current question
     const ta = document.createElement('textarea');
     ta.className = 'answer-input';
     ta.placeholder = 'Type your answer...';
-    ta.id = 'ansInput';
+    ta.id = 'ansInput_' + i;
 
     const btn = document.createElement('button');
     btn.textContent = 'Submit Answer';
@@ -799,6 +664,7 @@ function renderQuestion() {
       }
     });
   } else if (!bothAnswered) {
+    // Submitted, waiting for peer
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
     myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
@@ -809,6 +675,7 @@ function renderQuestion() {
     badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
     div.appendChild(badge);
   } else if (!revealed[i]) {
+    // Both answered, show reveal button
     const revealCard = document.createElement('div');
     revealCard.style.textAlign = 'center';
     revealCard.style.padding = '20px 0';
@@ -819,14 +686,11 @@ function renderQuestion() {
     revealBtn.style.width = '100%';
     revealBtn.style.padding = '14px 20px';
     revealBtn.style.fontSize = '1rem';
-    revealBtn.onclick = () => {
-      revealed[i] = true;
-      rounds.push({ question: currentQuestion, myAnswer: myAns, peerAnswer: peerAns });
-      renderQuestion();
-    };
+    revealBtn.onclick = () => { revealed[i] = true; renderQuestion(); };
     revealCard.appendChild(revealBtn);
     div.appendChild(revealCard);
   } else {
+    // Revealed — show both answers + next button
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
     myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
@@ -842,26 +706,25 @@ function renderQuestion() {
     nextBtn.style.width = '100%';
     nextBtn.style.padding = '14px 20px';
     nextBtn.style.fontSize = '1rem';
-    nextBtn.textContent = 'Next Question →';
-    nextBtn.onclick = async () => {
-      currentQuestion = '';
-      currentAiNote = '';
-      renderQuestion();
-      if (role === 'host') {
-        await generateNextQuestion();
-      }
-    };
+
+    if (currentQ < questions.length - 1) {
+      nextBtn.textContent = 'Next Question →';
+      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
+    } else {
+      nextBtn.textContent = 'See All Results';
+      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
+    }
     div.appendChild(nextBtn);
   }
 
   area.appendChild(div);
 
-  const inp = document.getElementById('ansInput');
+  const inp = document.getElementById('ansInput_' + i);
   if (inp) inp.focus();
 }
 
 function submitAnswer(index) {
-  const input = document.getElementById('ansInput');
+  const input = document.getElementById('ansInput_' + index);
   if (!input) return;
   const answer = input.value.trim();
   if (!answer) return;
@@ -873,46 +736,25 @@ function submitAnswer(index) {
 function showResults() {
   $('questionPhase').classList.add('hidden');
   $('resultsPhase').classList.remove('hidden');
-  $('progressFill').style.width = '100%';
-
-  if (currentAiNote) {
-    $('aiSummary').textContent = currentAiNote;
-  } else {
-    $('aiSummary').textContent = 'Here\'s a summary of all your answers.';
-  }
-
   const area = $('resultsArea');
   area.innerHTML = '';
 
-  for (let i = 0; i < rounds.length; i++) {
-    const rd = rounds[i];
+  for (let i = 0; i < questions.length; i++) {
     const div = document.createElement('div');
     div.className = 'result-item';
     div.innerHTML = `
-      <div class="q">Q${i + 1}: ${escHtml(rd.question)}</div>
+      <div class="q">${i + 1}. ${escHtml(questions[i])}</div>
       <div class="answer-display you">
-        <div class="who">${escHtml(myName)}</div>${escHtml(rd.myAnswer)}
+        <div class="who">You (${escHtml(myName)})</div>
+        ${escHtml(myAnswers[i] || '—')}
       </div>
       <div class="answer-display peer">
-        <div class="who">${escHtml(peerName)}</div>${escHtml(rd.peerAnswer)}
+        <div class="who">${escHtml(peerName)}</div>
+        ${escHtml(peerAnswers[i] || '—')}
       </div>
     `;
     area.appendChild(div);
   }
-}
-
-// --- UI ---
-function setStatus(state, text) {
-  const dot = $('statusDot');
-  dot.className = 'status-dot';
-  if (state === 'connected') dot.classList.add('connected');
-  else if (state === 'connecting') dot.classList.add('connecting');
-  $('statusText').textContent = text;
-}
-
-function showError(areaId, msg) {
-  const area = $(areaId);
-  if (area) area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
 }
 
 function escHtml(s) {
