@@ -786,16 +786,16 @@ function renderQuestion() {
     myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
     div.appendChild(myDiv);
 
-    const badge = document.createElement('div');
-    badge.className = 'waiting-badge';
-    badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
-    div.appendChild(badge);
-
     if (isAdmin && peerPeek[i] !== undefined) {
-      const peek = document.createElement('div');
-      peek.className = 'peek-box';
-      peek.innerHTML = `<div class="peek-label">Admin peek — ${escHtml(peerName)}'s current selection</div>${ratingHtml(peerPeek[i])}`;
-      div.appendChild(peek);
+      const peerDiv = document.createElement('div');
+      peerDiv.className = 'answer-display peer';
+      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(peerPeek[i])}`;
+      div.appendChild(peerDiv);
+    } else {
+      const badge = document.createElement('div');
+      badge.className = 'waiting-badge';
+      badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
+      div.appendChild(badge);
     }
   } else if (!revealed[i]) {
     // Both answered, show reveal button
