@@ -215,6 +215,40 @@
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
+  .rating-bar {
+    display: flex; gap: 6px; margin-top: 4px;
+  }
+
+  .rating-btn {
+    flex: 1; padding: 12px 4px; background: var(--surface2);
+    border: 2px solid var(--border); border-radius: 10px;
+    color: var(--text-dim); font-size: 0.72rem; font-weight: 600;
+    cursor: pointer; text-align: center; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+
+  .rating-btn .rating-emoji { font-size: 1.4rem; }
+
+  .rating-btn:hover { border-color: var(--accent); background: rgba(108, 92, 231, 0.08); }
+
+  .rating-btn.selected {
+    border-color: var(--accent); background: rgba(108, 92, 231, 0.15);
+    color: var(--text);
+  }
+
+  .rating-btn.r1.selected { border-color: var(--red); background: rgba(231, 76, 60, 0.12); }
+  .rating-btn.r2.selected { border-color: var(--orange); background: rgba(243, 156, 18, 0.12); }
+  .rating-btn.r3.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.12); }
+  .rating-btn.r4.selected { border-color: #27ae60; background: rgba(39, 174, 96, 0.12); }
+  .rating-btn.r5.selected { border-color: var(--green); background: rgba(46, 204, 113, 0.12); }
+
+  .rating-display {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.9rem; margin-top: 2px;
+  }
+
+  .rating-display .rating-emoji { font-size: 1.2rem; }
+
   .debug-log {
     margin-top: 8px; padding: 10px 14px;
     background: var(--surface2); border-radius: 8px;
@@ -346,6 +380,15 @@ let roomId = null;
 let connected = false;
 let currentQ = 0;
 let revealed = {};
+let selectedRating = null;
+
+const RATINGS = [
+  { value: 1, emoji: '😐', label: 'Not interested' },
+  { value: 2, emoji: '🤔', label: 'Slightly' },
+  { value: 3, emoji: '🙂', label: 'Moderate' },
+  { value: 4, emoji: '😊', label: 'Interested' },
+  { value: 5, emoji: '🤩', label: 'Very interested' },
+];
 
 function $(id) { return document.getElementById(id); }
 
@@ -642,32 +685,35 @@ function renderQuestion() {
   `;
 
   if (myAns === undefined) {
-    // Show input for current question
-    const ta = document.createElement('textarea');
-    ta.className = 'answer-input';
-    ta.placeholder = 'Type your answer...';
-    ta.id = 'ansInput_' + i;
+    selectedRating = null;
+    const bar = document.createElement('div');
+    bar.className = 'rating-bar';
+    bar.id = 'ratingBar_' + i;
+
+    RATINGS.forEach(r => {
+      const rb = document.createElement('button');
+      rb.className = `rating-btn r${r.value}`;
+      rb.innerHTML = `<span class="rating-emoji">${r.emoji}</span>${r.label}`;
+      rb.onclick = () => {
+        selectedRating = r.value;
+        bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+        rb.classList.add('selected');
+      };
+      bar.appendChild(rb);
+    });
 
     const btn = document.createElement('button');
-    btn.textContent = 'Submit Answer';
-    btn.style.marginTop = '10px';
+    btn.textContent = 'Submit Rating';
+    btn.style.marginTop = '12px';
     btn.style.width = '100%';
     btn.onclick = () => submitAnswer(i);
 
-    div.appendChild(ta);
+    div.appendChild(bar);
     div.appendChild(btn);
-
-    ta.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        submitAnswer(i);
-      }
-    });
   } else if (!bothAnswered) {
-    // Submitted, waiting for peer
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
-    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
+    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
     div.appendChild(myDiv);
 
     const badge = document.createElement('div');
@@ -690,15 +736,14 @@ function renderQuestion() {
     revealCard.appendChild(revealBtn);
     div.appendChild(revealCard);
   } else {
-    // Revealed — show both answers + next button
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
-    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${escHtml(myAns)}`;
+    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
     div.appendChild(myDiv);
 
     const peerDiv = document.createElement('div');
     peerDiv.className = 'answer-display peer';
-    peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${escHtml(peerAns)}`;
+    peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${ratingHtml(peerAns)}`;
     div.appendChild(peerDiv);
 
     const nextBtn = document.createElement('button');
@@ -724,13 +769,17 @@ function renderQuestion() {
 }
 
 function submitAnswer(index) {
-  const input = document.getElementById('ansInput_' + index);
-  if (!input) return;
-  const answer = input.value.trim();
-  if (!answer) return;
-  myAnswers[index] = answer;
-  publish('answers', { type: 'answer', index, answer, from: myName });
+  if (selectedRating === null) return;
+  myAnswers[index] = selectedRating;
+  publish('answers', { type: 'answer', index, answer: selectedRating, from: myName });
+  selectedRating = null;
   renderQuestion();
+}
+
+function ratingHtml(value) {
+  const r = RATINGS.find(r => r.value === value);
+  if (!r) return escHtml(String(value));
+  return `<div class="rating-display"><span class="rating-emoji">${r.emoji}</span> ${escHtml(r.label)}</div>`;
 }
 
 function showResults() {
@@ -746,11 +795,11 @@ function showResults() {
       <div class="q">${i + 1}. ${escHtml(questions[i])}</div>
       <div class="answer-display you">
         <div class="who">You (${escHtml(myName)})</div>
-        ${escHtml(myAnswers[i] || '—')}
+        ${ratingHtml(myAnswers[i])}
       </div>
       <div class="answer-display peer">
         <div class="who">${escHtml(peerName)}</div>
-        ${escHtml(peerAnswers[i] || '—')}
+        ${ratingHtml(peerAnswers[i])}
       </div>
     `;
     area.appendChild(div);
