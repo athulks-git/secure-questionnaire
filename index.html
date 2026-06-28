@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Secure Questionnaire</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -46,23 +47,9 @@
     padding: 30px 0 20px;
   }
 
-  header h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-
-  header p {
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    margin-top: 6px;
-  }
-
-  .shield {
-    display: inline-block;
-    font-size: 2rem;
-    margin-bottom: 8px;
-  }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+  header p { color: var(--text-dim); font-size: 0.85rem; margin-top: 6px; }
+  .shield { display: inline-block; font-size: 2rem; margin-bottom: 8px; }
 
   .status-bar {
     display: flex;
@@ -77,20 +64,14 @@
   }
 
   .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    flex-shrink: 0;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red); flex-shrink: 0;
   }
 
   .status-dot.connected { background: var(--green); }
   .status-dot.connecting { background: var(--orange); animation: pulse 1s infinite; }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   .card {
     background: var(--surface);
@@ -101,35 +82,23 @@
   }
 
   .card h2 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 0.95rem; font-weight: 600; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
   }
 
   .card h2 .step {
-    background: var(--accent);
-    color: white;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    flex-shrink: 0;
+    background: var(--accent); color: white;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; flex-shrink: 0;
   }
 
   .card p {
-    font-size: 0.82rem;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-    line-height: 1.5;
+    font-size: 0.82rem; color: var(--text-dim);
+    margin-bottom: 12px; line-height: 1.5;
   }
 
-  input[type="text"], input[type="password"], textarea {
+  input[type="text"], input[type="password"] {
     width: 100%;
     padding: 10px 14px;
     background: var(--surface2);
@@ -142,17 +111,7 @@
     transition: border-color 0.2s;
   }
 
-  input:focus, textarea:focus {
-    border-color: var(--accent);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 0.78rem;
-    line-height: 1.5;
-  }
+  input:focus { border-color: var(--accent); }
 
   button {
     padding: 10px 20px;
@@ -169,28 +128,15 @@
 
   button:hover { background: var(--accent-dim); }
   button:active { transform: scale(0.98); }
-
-  button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
-  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
   button.secondary {
     background: var(--surface2);
     border: 1px solid var(--border);
   }
+  button.secondary:hover { background: var(--border); }
 
-  button.secondary:hover {
-    background: var(--border);
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
-
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; }
   .btn-row button { flex: 1; }
 
   .file-drop {
@@ -209,10 +155,7 @@
   }
 
   .file-drop input {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
   }
 
   .file-drop .icon { font-size: 1.8rem; margin-bottom: 8px; }
@@ -227,19 +170,13 @@
   }
 
   .question-num {
-    font-size: 0.75rem;
-    color: var(--accent);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
+    font-size: 0.75rem; color: var(--accent); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
   }
 
   .question-text {
-    font-size: 1.05rem;
-    font-weight: 500;
-    line-height: 1.5;
-    margin-bottom: 16px;
+    font-size: 1.05rem; font-weight: 500;
+    line-height: 1.5; margin-bottom: 16px;
   }
 
   .answer-input {
@@ -268,31 +205,22 @@
     line-height: 1.5;
   }
 
-  .answer-display .who {
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
+  .answer-display .who { font-size: 0.75rem; font-weight: 600; margin-bottom: 4px; }
   .answer-display.you .who { color: var(--accent); }
   .answer-display.peer .who { color: var(--green); }
 
   .waiting-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    display: inline-flex; align-items: center; gap: 6px;
     padding: 6px 12px;
     background: rgba(243, 156, 18, 0.1);
     border: 1px solid rgba(243, 156, 18, 0.2);
     border-radius: 20px;
-    font-size: 0.78rem;
-    color: var(--orange);
+    font-size: 0.78rem; color: var(--orange);
     margin-top: 10px;
   }
 
   .progress-bar {
-    width: 100%;
-    height: 4px;
+    width: 100%; height: 4px;
     background: var(--surface2);
     border-radius: 2px;
     margin-bottom: 16px;
@@ -300,15 +228,11 @@
   }
 
   .progress-bar .fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.4s ease;
+    height: 100%; background: var(--accent);
+    border-radius: 2px; transition: width 0.4s ease;
   }
 
-  .results-section {
-    margin-top: 8px;
-  }
+  .results-section { margin-top: 8px; }
 
   .result-item {
     background: var(--surface);
@@ -318,87 +242,59 @@
     margin-bottom: 10px;
   }
 
-  .result-item .q {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-  }
+  .result-item .q { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
 
   .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
   }
-
-  .tag.e2e {
-    background: rgba(46, 204, 113, 0.15);
-    color: var(--green);
-  }
+  .tag.e2e { background: rgba(46, 204, 113, 0.15); color: var(--green); }
 
   .hidden { display: none !important; }
 
-  .name-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+  .share-link-box {
+    display: flex; gap: 8px; align-items: center;
+    margin-top: 12px;
   }
 
-  .name-row input { flex: 1; }
+  .share-link-box input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.82rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    outline: none;
+  }
+
+  .room-code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-align: center;
+    color: var(--accent);
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    margin: 12px 0;
+    user-select: all;
+  }
 
   .copy-feedback {
-    font-size: 0.78rem;
-    color: var(--green);
-    margin-top: 6px;
-    opacity: 0;
-    transition: opacity 0.2s;
+    font-size: 0.78rem; color: var(--green);
+    margin-top: 6px; opacity: 0; transition: opacity 0.2s;
   }
-
   .copy-feedback.show { opacity: 1; }
 
-  .role-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .role-tab {
-    flex: 1;
-    padding: 14px;
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-  }
-
-  .role-tab:hover { border-color: var(--accent); }
-
-  .role-tab.active {
-    border-color: var(--accent);
-    background: rgba(108, 92, 231, 0.1);
-  }
-
-  .role-tab .role-icon { font-size: 1.5rem; margin-bottom: 6px; }
-  .role-tab .role-name { font-size: 0.85rem; font-weight: 600; }
-  .role-tab .role-desc { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
-
   .passphrase-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+    display: flex; gap: 8px; align-items: center;
   }
-
   .passphrase-row input { flex: 1; }
-
-  .passphrase-row button {
-    padding: 10px 14px;
-    flex-shrink: 0;
-  }
+  .passphrase-row button { padding: 10px 14px; flex-shrink: 0; }
 
   .info-box {
     padding: 12px 16px;
@@ -411,9 +307,24 @@
     margin-top: 12px;
   }
 
+  .error-box {
+    padding: 12px 16px;
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--red);
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  .join-view { text-align: center; }
+  .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
+
   @media (max-width: 480px) {
     .container { padding: 12px; }
     header h1 { font-size: 1.3rem; }
+    .room-code { font-size: 1.4rem; }
   }
 </style>
 </head>
@@ -431,7 +342,7 @@
     <span style="margin-left:auto" class="tag e2e" id="e2eTag" style="display:none">E2E Encrypted</span>
   </div>
 
-  <!-- PHASE 1: Setup -->
+  <!-- PHASE 1A: Host setup (no room in URL) -->
   <div id="setupPhase">
     <div class="card">
       <h2><span class="step">1</span> Your Name</h2>
@@ -440,33 +351,15 @@
 
     <div class="card">
       <h2><span class="step">2</span> Shared Passphrase</h2>
-      <p>Both participants must use the same passphrase. This encrypts all messages beyond the WebRTC layer.</p>
+      <p>Both participants must use the same passphrase. Share it separately (in person, call, or message).</p>
       <div class="passphrase-row">
         <input type="password" id="passphrase" placeholder="Enter a shared secret passphrase">
         <button onclick="togglePassVis()" class="secondary" id="passToggle">Show</button>
       </div>
     </div>
 
-    <div class="card">
-      <h2><span class="step">3</span> Choose Your Role</h2>
-      <p>One person creates the room, the other joins it.</p>
-      <div class="role-tabs">
-        <div class="role-tab" onclick="selectRole('host')" id="roleHost">
-          <div class="role-icon">&#128386;</div>
-          <div class="role-name">Create Room</div>
-          <div class="role-desc">Generate an invite code</div>
-        </div>
-        <div class="role-tab" onclick="selectRole('guest')" id="roleGuest">
-          <div class="role-icon">&#128279;</div>
-          <div class="role-name">Join Room</div>
-          <div class="role-desc">Paste an invite code</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Host: generate offer -->
-    <div class="card hidden" id="hostSetup">
-      <h2><span class="step">4</span> Upload Questionnaire</h2>
+    <div class="card" id="uploadCard">
+      <h2><span class="step">3</span> Upload Questionnaire</h2>
       <p>Upload a text file with numbered questions (e.g. "1. What is your name?"). One question per line.</p>
       <div class="file-drop" id="fileDrop">
         <input type="file" accept=".txt,.text" id="fileInput">
@@ -477,48 +370,44 @@
         <p id="fileInfo" style="color:var(--green)"></p>
       </div>
       <div class="btn-row">
-        <button onclick="createOffer()" id="createBtn" disabled>Create Room</button>
+        <button onclick="createRoom()" id="createBtn" disabled>Create Room &amp; Get Link</button>
       </div>
     </div>
 
-    <div class="card hidden" id="hostOffer">
-      <h2><span class="step">5</span> Share This Invite Code</h2>
-      <p>Copy this code and send it to the other person through any channel (message, email, etc).</p>
-      <textarea id="offerText" readonly rows="4"></textarea>
-      <div class="btn-row">
-        <button onclick="copyOffer()">Copy Code</button>
+    <!-- After room is created -->
+    <div class="card hidden" id="shareCard">
+      <h2>&#127881; Room Created!</h2>
+      <p>Share this link with the other person. They just need to open it and enter the passphrase.</p>
+      <div class="share-link-box">
+        <input type="text" id="shareLink" readonly>
+        <button onclick="copyLink()">Copy</button>
       </div>
-      <div class="copy-feedback" id="copyOfferFb">Copied to clipboard!</div>
-    </div>
-
-    <div class="card hidden" id="hostAnswer">
-      <h2><span class="step">6</span> Paste Their Response Code</h2>
-      <p>The other person will give you a response code. Paste it below.</p>
-      <textarea id="answerText" rows="4" placeholder="Paste the response code here..."></textarea>
-      <div class="btn-row">
-        <button onclick="acceptAnswer()">Connect</button>
+      <div class="copy-feedback" id="copyLinkFb">Copied to clipboard!</div>
+      <p style="margin-top:12px; margin-bottom:0">Or share the room code:</p>
+      <div class="room-code" id="roomCodeDisplay"></div>
+      <div class="info-box">
+        <span class="status-dot connecting" style="display:inline-block;vertical-align:middle;margin-right:6px"></span>
+        Waiting for the other person to join...
       </div>
     </div>
+    <div id="errorArea"></div>
+  </div>
 
-    <!-- Guest: paste offer, generate answer -->
-    <div class="card hidden" id="guestSetup">
-      <h2><span class="step">4</span> Paste Invite Code</h2>
-      <p>Paste the invite code you received from the room creator.</p>
-      <textarea id="guestOfferText" rows="4" placeholder="Paste the invite code here..."></textarea>
-      <div class="btn-row">
-        <button onclick="joinRoom()">Join</button>
+  <!-- PHASE 1B: Guest join (room in URL) -->
+  <div id="joinPhase" class="hidden">
+    <div class="card join-view">
+      <div class="join-icon">&#128279;</div>
+      <h2 style="justify-content:center">You've been invited!</h2>
+      <p style="text-align:center">Enter your name and the shared passphrase to join the questionnaire session.</p>
+      <input type="text" id="guestName" placeholder="Enter your display name" maxlength="30" style="margin-bottom:10px">
+      <div class="passphrase-row">
+        <input type="password" id="guestPassphrase" placeholder="Enter the shared passphrase">
+        <button onclick="toggleGuestPassVis()" class="secondary" id="guestPassToggle">Show</button>
       </div>
-    </div>
-
-    <div class="card hidden" id="guestAnswer">
-      <h2><span class="step">5</span> Share This Response Code</h2>
-      <p>Copy this code and send it back to the room creator.</p>
-      <textarea id="guestAnswerText" readonly rows="4"></textarea>
       <div class="btn-row">
-        <button onclick="copyGuestAnswer()">Copy Code</button>
+        <button onclick="joinRoom()" id="joinBtn">Join Session</button>
       </div>
-      <div class="copy-feedback" id="copyGuestFb">Copied to clipboard!</div>
-      <div class="info-box">Waiting for connection... The host will paste your code on their side.</div>
+      <div id="joinError"></div>
     </div>
   </div>
 
@@ -527,7 +416,6 @@
     <div class="progress-bar">
       <div class="fill" id="progressFill" style="width:0%"></div>
     </div>
-
     <div id="questionArea"></div>
   </div>
 
@@ -542,68 +430,51 @@
 </div>
 
 <script>
-const ICE_SERVERS = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' }
-];
-
-let pc = null;
-let dc = null;
+let peer = null;
+let conn = null;
 let role = null;
 let myName = '';
 let peerName = '';
 let questions = [];
-let currentQ = 0;
 let myAnswers = {};
 let peerAnswers = {};
 let cryptoKey = null;
+let roomId = null;
 
 function $(id) { return document.getElementById(id); }
+
+function generateRoomCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  const arr = crypto.getRandomValues(new Uint8Array(6));
+  for (let i = 0; i < 6; i++) code += chars[arr[i] % chars.length];
+  return code;
+}
+
+function getRoomFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('room');
+}
 
 function togglePassVis() {
   const inp = $('passphrase');
   const btn = $('passToggle');
-  if (inp.type === 'password') {
-    inp.type = 'text';
-    btn.textContent = 'Hide';
-  } else {
-    inp.type = 'password';
-    btn.textContent = 'Show';
-  }
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
 }
 
-function selectRole(r) {
-  if (!$('userName').value.trim()) {
-    $('userName').focus();
-    $('userName').style.borderColor = 'var(--red)';
-    setTimeout(() => $('userName').style.borderColor = '', 1500);
-    return;
-  }
-  if (!$('passphrase').value.trim()) {
-    $('passphrase').focus();
-    $('passphrase').style.borderColor = 'var(--red)';
-    setTimeout(() => $('passphrase').style.borderColor = '', 1500);
-    return;
-  }
-
-  role = r;
-  $('roleHost').classList.toggle('active', r === 'host');
-  $('roleGuest').classList.toggle('active', r === 'guest');
-  $('hostSetup').classList.toggle('hidden', r !== 'host');
-  $('guestSetup').classList.toggle('hidden', r !== 'guest');
-  $('hostOffer').classList.add('hidden');
-  $('hostAnswer').classList.add('hidden');
-  $('guestAnswer').classList.add('hidden');
+function toggleGuestPassVis() {
+  const inp = $('guestPassphrase');
+  const btn = $('guestPassToggle');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
 }
 
-// File handling
+// --- File handling ---
 const fileDrop = $('fileDrop');
 const fileInput = $('fileInput');
 
-fileDrop.addEventListener('dragover', e => {
-  e.preventDefault();
-  fileDrop.classList.add('dragover');
-});
+fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
 fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
 fileDrop.addEventListener('drop', e => {
   e.preventDefault();
@@ -644,7 +515,7 @@ function parseQuestions(text) {
   return qs;
 }
 
-// Crypto
+// --- Crypto (AES-256-GCM on top of WebRTC DTLS) ---
 async function deriveKey(passphrase) {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
@@ -677,52 +548,31 @@ async function decrypt(b64) {
   return new TextDecoder().decode(pt);
 }
 
-function sendMsg(obj) {
-  if (dc && dc.readyState === 'open') {
-    encrypt(JSON.stringify(obj)).then(enc => dc.send(enc));
+async function sendMsg(obj) {
+  if (conn && conn.open) {
+    const encrypted = await encrypt(JSON.stringify(obj));
+    conn.send(encrypted);
   }
 }
 
-// Compress SDP for shorter codes
-function compressSDP(sdp) {
-  return btoa(JSON.stringify(sdp));
-}
+// --- Connection handling ---
+function setupConnection(connection) {
+  conn = connection;
 
-function decompressSDP(str) {
-  return JSON.parse(atob(str));
-}
-
-// WebRTC
-function setupPC() {
-  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-
-  pc.oniceconnectionstatechange = () => {
-    const state = pc.iceConnectionState;
-    if (state === 'connected' || state === 'completed') {
-      setStatus('connected', `Connected to ${peerName || 'peer'}`);
-      $('e2eTag').style.display = '';
-    } else if (state === 'disconnected' || state === 'failed') {
-      setStatus('disconnected', 'Connection lost');
-    }
-  };
-}
-
-function setupDC(channel) {
-  dc = channel;
-  dc.onopen = () => {
-    myName = $('userName').value.trim();
+  conn.on('open', () => {
+    setStatus('connected', 'Connected! Exchanging info...');
     sendMsg({ type: 'hello', name: myName });
-
     if (role === 'host') {
       sendMsg({ type: 'questions', questions });
     }
-  };
+  });
 
-  dc.onmessage = async e => {
+  conn.on('data', async data => {
     let msg;
     try {
-      msg = JSON.parse(await decrypt(e.data));
+      msg = JSON.parse(await decrypt(data));
     } catch {
+      showError('Decryption failed. Make sure both users entered the same passphrase.');
       return;
     }
 
@@ -730,6 +580,9 @@ function setupDC(channel) {
       peerName = msg.name;
       setStatus('connected', `Connected to ${peerName}`);
       $('e2eTag').style.display = '';
+      if (role === 'host' && questions.length > 0) {
+        startQuestionnaire();
+      }
     }
 
     if (msg.type === 'questions') {
@@ -741,9 +594,10 @@ function setupDC(channel) {
       peerAnswers[msg.index] = msg.answer;
       renderQuestion();
     }
-  };
+  });
 
-  dc.onclose = () => setStatus('disconnected', 'Disconnected');
+  conn.on('close', () => setStatus('disconnected', 'Disconnected'));
+  conn.on('error', err => showError('Connection error: ' + err.message));
 }
 
 function setStatus(state, text) {
@@ -754,82 +608,122 @@ function setStatus(state, text) {
   $('statusText').textContent = text;
 }
 
-async function createOffer() {
+function showError(msg) {
+  const area = $('errorArea') || $('joinError');
+  if (area) {
+    area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
+  }
+}
+
+// --- Host: Create Room ---
+async function createRoom() {
   if (questions.length === 0) return;
-  cryptoKey = await deriveKey($('passphrase').value);
+  if (!$('userName').value.trim()) {
+    $('userName').focus();
+    $('userName').style.borderColor = 'var(--red)';
+    setTimeout(() => $('userName').style.borderColor = '', 1500);
+    return;
+  }
+  if (!$('passphrase').value.trim()) {
+    $('passphrase').focus();
+    $('passphrase').style.borderColor = 'var(--red)';
+    setTimeout(() => $('passphrase').style.borderColor = '', 1500);
+    return;
+  }
+
+  role = 'host';
   myName = $('userName').value.trim();
-  setupPC();
+  cryptoKey = await deriveKey($('passphrase').value);
+  roomId = generateRoomCode();
 
-  const channel = pc.createDataChannel('questionnaire');
-  setupDC(channel);
+  $('createBtn').disabled = true;
+  $('createBtn').textContent = 'Creating...';
+  setStatus('connecting', 'Creating room...');
 
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
+  const peerId = 'sq-' + roomId;
+  peer = new Peer(peerId);
 
-  await new Promise(resolve => {
-    pc.onicecandidate = e => { if (!e.candidate) resolve(); };
+  peer.on('open', () => {
+    setStatus('connecting', 'Room created. Waiting for peer...');
+    $('uploadCard').classList.add('hidden');
+    $('shareCard').classList.remove('hidden');
+
+    const link = window.location.origin + window.location.pathname + '?room=' + roomId;
+    $('shareLink').value = link;
+    $('roomCodeDisplay').textContent = roomId;
   });
 
-  setStatus('connecting', 'Waiting for peer...');
-  $('offerText').value = compressSDP(pc.localDescription);
-  $('hostSetup').classList.add('hidden');
-  $('hostOffer').classList.remove('hidden');
-  $('hostAnswer').classList.remove('hidden');
+  peer.on('connection', connection => {
+    setupConnection(connection);
+  });
+
+  peer.on('error', err => {
+    $('createBtn').disabled = false;
+    $('createBtn').textContent = 'Create Room & Get Link';
+    if (err.type === 'unavailable-id') {
+      showError('This room code is already in use. Please try again.');
+    } else {
+      showError('Error: ' + err.message);
+    }
+    setStatus('disconnected', 'Error');
+  });
 }
 
-function copyOffer() {
-  navigator.clipboard.writeText($('offerText').value);
-  const fb = $('copyOfferFb');
+function copyLink() {
+  navigator.clipboard.writeText($('shareLink').value);
+  const fb = $('copyLinkFb');
   fb.classList.add('show');
   setTimeout(() => fb.classList.remove('show'), 2000);
 }
 
-async function acceptAnswer() {
-  const answerStr = $('answerText').value.trim();
-  if (!answerStr) return;
-  const answer = decompressSDP(answerStr);
-  await pc.setRemoteDescription(new RTCSessionDescription(answer));
-}
-
+// --- Guest: Join Room ---
 async function joinRoom() {
-  const offerStr = $('guestOfferText').value.trim();
-  if (!offerStr) return;
+  if (!$('guestName').value.trim()) {
+    $('guestName').focus();
+    $('guestName').style.borderColor = 'var(--red)';
+    setTimeout(() => $('guestName').style.borderColor = '', 1500);
+    return;
+  }
+  if (!$('guestPassphrase').value.trim()) {
+    $('guestPassphrase').focus();
+    $('guestPassphrase').style.borderColor = 'var(--red)';
+    setTimeout(() => $('guestPassphrase').style.borderColor = '', 1500);
+    return;
+  }
 
-  cryptoKey = await deriveKey($('passphrase').value);
-  myName = $('userName').value.trim();
-  setupPC();
+  role = 'guest';
+  myName = $('guestName').value.trim();
+  cryptoKey = await deriveKey($('guestPassphrase').value);
 
-  pc.ondatachannel = e => {
-    setupDC(e.channel);
-  };
+  $('joinBtn').disabled = true;
+  $('joinBtn').textContent = 'Connecting...';
+  setStatus('connecting', 'Connecting to room...');
 
-  const offer = decompressSDP(offerStr);
-  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  peer = new Peer();
 
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
-
-  await new Promise(resolve => {
-    pc.onicecandidate = e => { if (!e.candidate) resolve(); };
+  peer.on('open', () => {
+    const hostPeerId = 'sq-' + roomId;
+    const connection = peer.connect(hostPeerId, { reliable: true });
+    setupConnection(connection);
   });
 
-  setStatus('connecting', 'Connecting...');
-  $('guestSetup').classList.add('hidden');
-  $('guestAnswer').classList.remove('hidden');
-  $('guestAnswerText').value = compressSDP(pc.localDescription);
+  peer.on('error', err => {
+    $('joinBtn').disabled = false;
+    $('joinBtn').textContent = 'Join Session';
+    if (err.type === 'peer-unavailable') {
+      $('joinError').innerHTML = '<div class="error-box">Room not found. The host may not have created the room yet, or the code is wrong.</div>';
+    } else {
+      $('joinError').innerHTML = `<div class="error-box">Error: ${escHtml(err.message)}</div>`;
+    }
+    setStatus('disconnected', 'Connection failed');
+  });
 }
 
-function copyGuestAnswer() {
-  navigator.clipboard.writeText($('guestAnswerText').value);
-  const fb = $('copyGuestFb');
-  fb.classList.add('show');
-  setTimeout(() => fb.classList.remove('show'), 2000);
-}
-
+// --- Questionnaire ---
 function startQuestionnaire() {
   $('setupPhase').classList.add('hidden');
+  $('joinPhase').classList.add('hidden');
   $('questionPhase').classList.remove('hidden');
-  currentQ = 0;
   renderQuestion();
 }
 
@@ -902,7 +796,6 @@ function renderQuestion() {
     area.appendChild(div);
   }
 
-  // Scroll to first unanswered
   for (let i = 0; i < questions.length; i++) {
     if (myAnswers[i] === undefined) {
       const el = document.getElementById('ansInput_' + i);
@@ -920,7 +813,6 @@ function submitAnswer(index) {
   if (!input) return;
   const answer = input.value.trim();
   if (!answer) return;
-
   myAnswers[index] = answer;
   sendMsg({ type: 'answer', index, answer });
   renderQuestion();
@@ -929,7 +821,6 @@ function submitAnswer(index) {
 function showResults() {
   $('questionPhase').classList.add('hidden');
   $('resultsPhase').classList.remove('hidden');
-
   const area = $('resultsArea');
   area.innerHTML = '';
 
@@ -956,6 +847,15 @@ function escHtml(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+
+// --- Init: detect if joining or hosting ---
+(function init() {
+  roomId = getRoomFromURL();
+  if (roomId) {
+    $('setupPhase').classList.add('hidden');
+    $('joinPhase').classList.remove('hidden');
+  }
+})();
 </script>
 </body>
 </html>
