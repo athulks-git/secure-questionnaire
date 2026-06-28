@@ -810,31 +810,23 @@ function renderQuestion() {
       badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
       div.appendChild(badge);
     }
-  } else if (!revealed[i] && !isAdmin) {
-    // Both answered, show reveal button
-    const revealCard = document.createElement('div');
-    revealCard.style.textAlign = 'center';
-    revealCard.style.padding = '20px 0';
-    revealCard.innerHTML = `<p style="color:var(--green);font-size:0.85rem;margin-bottom:12px">Both of you have answered!</p>`;
-
-    const revealBtn = document.createElement('button');
-    revealBtn.textContent = 'Reveal Answers';
-    revealBtn.style.width = '100%';
-    revealBtn.style.padding = '14px 20px';
-    revealBtn.style.fontSize = '1rem';
-    revealBtn.onclick = () => { revealed[i] = true; renderQuestion(); };
-    revealCard.appendChild(revealBtn);
-    div.appendChild(revealCard);
   } else {
-    const myDiv = document.createElement('div');
-    myDiv.className = 'answer-display you';
-    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
-    div.appendChild(myDiv);
+    const doneMsg = document.createElement('p');
+    doneMsg.style.cssText = 'color:var(--green);font-size:0.85rem;margin-bottom:12px;text-align:center';
+    doneMsg.textContent = 'Both of you have answered!';
+    div.appendChild(doneMsg);
 
-    const peerDiv = document.createElement('div');
-    peerDiv.className = 'answer-display peer';
-    peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${ratingHtml(peerAns)}`;
-    div.appendChild(peerDiv);
+    if (isAdmin) {
+      const myDiv = document.createElement('div');
+      myDiv.className = 'answer-display you';
+      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
+      div.appendChild(myDiv);
+
+      const peerDiv = document.createElement('div');
+      peerDiv.className = 'answer-display peer';
+      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)}</div>${ratingHtml(peerAns)}`;
+      div.appendChild(peerDiv);
+    }
 
     const nextBtn = document.createElement('button');
     nextBtn.style.marginTop = '16px';
