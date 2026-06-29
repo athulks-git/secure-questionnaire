@@ -705,7 +705,7 @@ function connectMQTT() {
     client.on('error', err => { if(!resolved){resolved=true;reject(err);} });
     client.on('message', async (t, msg) => {
       const s=t.replace(`sq/${roomId}/`,''); let m;
-      try { m=JSON.parse(await decrypt(msg.toString())); } catch { return; }
+      try { m=JSON.parse(await decrypt(msg.toString())); } catch(e) { console.warn('Decrypt failed for', s, e.message); return; }
       handleMessage(s, m);
     });
     client.on('offline', () => { if(wasConnected){$('reconnectBanner').classList.add('show');setStatus('connecting','Reconnecting...');} });
@@ -715,10 +715,13 @@ function connectMQTT() {
 
 async function publish(s, o) {
   if (!client||!client.connected) return;
-  client.publish(topic(s), await encrypt(JSON.stringify(o)), { qos:1, retain:s==='room' });
+  const payload = await encrypt(JSON.stringify(o));
+  return new Promise(resolve => {
+    client.publish(topic(s), payload, { qos:1, retain:s==='room' }, () => resolve());
+  });
 }
 
-function handleMessage(suffix, msg) {
+async function handleMessage(suffix, msg) {
   if (suffix === 'room' && role === 'guest' && !connected) {
     questions1 = msg.questions1; questions2 = msg.questions2;
     peerName = msg.hostName; hostHasAdmin = msg.adminEnabled || false;
@@ -730,7 +733,7 @@ function handleMessage(suffix, msg) {
   }
 
   if (suffix === 'joinreq' && role === 'host') {
-    publish('room', { type:'room', questions1, questions2, hostName:myName, adminEnabled:isAdmin });
+    await publish('room', { type:'room', questions1, questions2, hostName:myName, adminEnabled:isAdmin });
   }
 
   if (suffix === 'join' && role === 'host') {
@@ -840,34 +843,21 @@ async function joinRoom() {
   try {
     await connectMQTT();
     setStatus('connecting', 'Waiting for room data...');
-    // Aggressively retry: resubscribe forces broker to resend retained messages,
-    // and joinreq asks the host to republish room data
-    let retries = 0;
-    const tryGetRoom = () => {
+    // Poll: send joinreq every 2s until connected or 10 attempts
+    let attempts = 0;
+    const poll = async () => {
       if (connected) return;
-      retries++;
-      if (retries > 8) {
+      attempts++;
+      if (attempts > 10) {
         showError('joinError', 'Room data not received. Check passphrase and make sure the host is online.');
         $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
         return;
       }
-      // Resubscribe to force broker to resend retained messages
-      client.unsubscribe(topic('+'), () => {
-        if (connected) return;
-        client.subscribe(topic('+'), { qos: 1 }, () => {
-          if (connected) return;
-          publish('joinreq', { type:'joinreq', name:myName });
-          setTimeout(tryGetRoom, 2000);
-        });
-      });
+      await publish('joinreq', { type:'joinreq', name:myName });
+      setTimeout(poll, 2000);
     };
-    // First attempt after a short delay for any in-flight retained message
-    setTimeout(() => {
-      if (!connected) {
-        publish('joinreq', { type:'joinreq', name:myName });
-        setTimeout(tryGetRoom, 2000);
-      }
-    }, 500);
+    // Wait briefly for any retained message, then start polling
+    setTimeout(poll, 800);
   } catch (err) {
     $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
     showError('joinError', 'Failed: ' + err.message);
