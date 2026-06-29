@@ -124,15 +124,6 @@
   }
   .question-text { font-size: 1.05rem; font-weight: 500; line-height: 1.5; margin-bottom: 16px; }
 
-  .answer-input {
-    width: 100%; padding: 12px 16px; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); font-size: 0.9rem; font-family: inherit;
-    outline: none; resize: vertical; min-height: 60px;
-    transition: border-color 0.2s;
-  }
-  .answer-input:focus { border-color: var(--accent); }
-
   .answer-display {
     padding: 12px 16px; background: var(--surface2);
     border-radius: 8px; margin-top: 10px; font-size: 0.88rem; line-height: 1.5;
@@ -200,7 +191,7 @@
 
   .info-box {
     padding: 12px 16px;
-    background: rgba(108, 92, 231, 0.08); border: 1px solid rgba(108, 92, 231, 0.2);
+    background: rgba(0, 148, 255, 0.08); border: 1px solid rgba(0, 148, 255, 0.2);
     border-radius: 8px; font-size: 0.8rem; color: var(--text-dim);
     line-height: 1.5; margin-top: 12px;
   }
@@ -229,7 +220,7 @@
 
   .rating-btn .rating-emoji { font-size: 1.5rem; flex-shrink: 0; }
 
-  .rating-btn:hover { border-color: var(--accent); background: rgba(108, 92, 231, 0.08); color: var(--text); }
+  .rating-btn:hover { border-color: var(--accent); background: rgba(0, 148, 255, 0.08); color: var(--text); }
 
   .rating-btn.selected { color: var(--text); }
 
@@ -286,15 +277,6 @@
     letter-spacing: 0.5px; color: var(--red); margin-bottom: 4px;
   }
 
-  .debug-log {
-    margin-top: 8px; padding: 10px 14px;
-    background: var(--surface2); border-radius: 8px;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 0.72rem; color: var(--text-dim);
-    max-height: 120px; overflow-y: auto;
-    line-height: 1.6;
-  }
-
   .chat-container {
     background: var(--surface); border: none;
     overflow: hidden;
@@ -306,7 +288,6 @@
     border-bottom: 1px solid var(--border);
     font-size: 0.8rem; color: var(--text-dim);
   }
-  .chat-header .q-text { color: var(--text); font-weight: 600; font-size: 0.9rem; margin-top: 4px; }
 
   .chat-messages {
     padding: 12px 16px; min-height: 200px; max-height: 400px;
@@ -339,8 +320,8 @@
   .chat-bubble.peer .bubble-name { color: var(--green); }
 
   .chat-bubble.system {
-    align-self: center; background: rgba(108, 92, 231, 0.1);
-    border: 1px solid rgba(108, 92, 231, 0.2);
+    align-self: center; background: rgba(0, 148, 255, 0.1);
+    border: 1px solid rgba(0, 148, 255, 0.2);
     color: var(--text-dim); font-size: 0.78rem; text-align: center;
     border-radius: 12px; max-width: 90%;
   }
@@ -351,7 +332,7 @@
     font-size: 0.82rem; font-weight: 600;
   }
   .chat-bubble.mine .answer-tag { background: rgba(255,255,255,0.15); }
-  .chat-bubble.peer .answer-tag { background: rgba(108, 92, 231, 0.1); }
+  .chat-bubble.peer .answer-tag { background: rgba(0, 148, 255, 0.1); }
 
   .chat-input-row {
     display: flex; gap: 8px; padding: 10px 12px;
@@ -370,7 +351,7 @@
 
   .ready-bar {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 16px; border-top: 1px solid var(--border);
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
     background: var(--surface);
   }
   .ready-bar button { flex: 1; }
@@ -378,6 +359,37 @@
     font-size: 0.78rem; color: var(--text-dim); text-align: center; width: 100%;
   }
   .ready-bar .ready-check { color: var(--green); font-weight: 600; }
+
+  .q-picker {
+    padding: 12px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .q-picker-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--red); margin-bottom: 8px;
+  }
+  .q-picker-grid {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .q-picker-btn {
+    width: 36px; height: 36px; padding: 0;
+    border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+  }
+  .q-picker-btn:hover { border-color: var(--accent); color: var(--text); background: rgba(0,148,255,0.08); }
+  .q-picker-btn.current { border-color: var(--accent); background: var(--accent); color: white; }
+  .q-picker-btn.answered { border-color: var(--green); color: var(--green); }
+  .q-picker-btn.both-answered { background: rgba(46,204,113,0.15); border-color: var(--green); color: var(--green); }
+
+  .reconnect-banner {
+    padding: 8px 16px; background: rgba(243, 156, 18, 0.1);
+    border-bottom: 1px solid rgba(243, 156, 18, 0.2);
+    font-size: 0.78rem; color: var(--orange); text-align: center;
+    display: none;
+  }
+  .reconnect-banner.show { display: block; }
 
   @media (max-width: 480px) {
     .container { padding: 12px 0; }
@@ -398,6 +410,11 @@
     <h1>Secure Questionnaire</h1>
     <p>End-to-end encrypted &middot; No server sees your data</p>
   </header>
+
+  <div class="reconnect-banner" id="reconnectBanner">
+    <span class="status-dot connecting" style="display:inline-block;vertical-align:middle;margin-right:6px"></span>
+    Connection lost. Reconnecting...
+  </div>
 
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
@@ -478,6 +495,19 @@
     </div>
   </div>
 
+  <!-- RESUME SESSION -->
+  <div id="resumePhase" class="hidden">
+    <div class="card" style="text-align:center">
+      <h2 style="justify-content:center">&#128260; Resume Session?</h2>
+      <p style="text-align:center">You have a previous session in progress.</p>
+      <p id="resumeInfo" style="text-align:center;color:var(--accent)"></p>
+      <div class="btn-row">
+        <button onclick="resumeSession()">Resume</button>
+        <button onclick="clearSavedSession()" class="secondary">New Session</button>
+      </div>
+    </div>
+  </div>
+
   <!-- QUESTIONNAIRE -->
   <div id="questionPhase" class="hidden">
     <div class="progress-bar">
@@ -498,6 +528,7 @@
 
 <script>
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
+const SESSION_KEY = 'sq_session';
 
 let client = null;
 let role = null;
@@ -510,7 +541,6 @@ let cryptoKey = null;
 let roomId = null;
 let connected = false;
 let currentQ = 0;
-let revealed = {};
 let selectedRating = null;
 let isAdmin = false;
 let hostHasAdmin = false;
@@ -518,13 +548,103 @@ let peerPeek = {};
 let chatMessages = {};
 let myReady = {};
 let peerReady = {};
+let mqttReady = false;
+let wasConnected = false;
 
 const RATINGS = [
-  { value: 0, emoji: '👎', label: 'Not Interested' },
-  { value: 1, emoji: '👍', label: 'Interested' },
+  { value: 0, emoji: '\u{1F44E}', label: 'Not Interested' },
+  { value: 1, emoji: '\u{1F44D}', label: 'Interested' },
 ];
 
 function $(id) { return document.getElementById(id); }
+
+// --- Session persistence ---
+function saveSession() {
+  if (!roomId || !questions.length) return;
+  const data = {
+    roomId, role, myName, peerName, questions,
+    myAnswers, peerAnswers, currentQ,
+    isAdmin, hostHasAdmin,
+    chatMessages, myReady, peerReady,
+    ts: Date.now()
+  };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return data;
+  } catch { return null; }
+}
+
+function clearSavedSession() {
+  localStorage.removeItem(SESSION_KEY);
+  $('resumePhase').classList.add('hidden');
+  $('setupPhase').classList.remove('hidden');
+  const urlRoom = getRoomFromURL();
+  if (urlRoom) {
+    $('setupPhase').classList.add('hidden');
+    $('joinPhase').classList.remove('hidden');
+  }
+}
+
+async function resumeSession() {
+  const data = loadSession();
+  if (!data) { clearSavedSession(); return; }
+
+  role = data.role;
+  myName = data.myName;
+  peerName = data.peerName;
+  questions = data.questions;
+  myAnswers = data.myAnswers || {};
+  peerAnswers = data.peerAnswers || {};
+  currentQ = data.currentQ || 0;
+  isAdmin = data.isAdmin || false;
+  hostHasAdmin = data.hostHasAdmin || false;
+  chatMessages = data.chatMessages || {};
+  myReady = data.myReady || {};
+  peerReady = data.peerReady || {};
+  roomId = data.roomId;
+
+  $('resumePhase').classList.add('hidden');
+
+  const passEl = role === 'host' ? $('passphrase') : $('guestPassphrase');
+  const passPrompt = prompt('Enter your passphrase to rejoin:');
+  if (!passPrompt) { clearSavedSession(); return; }
+
+  cryptoKey = await deriveKey(passPrompt);
+  setStatus('connecting', 'Reconnecting...');
+
+  try {
+    await connectMQTT();
+    if (role === 'host') {
+      await publish('room', { type: 'room', questions, hostName: myName, adminEnabled: isAdmin });
+    }
+    publish('sync', { type: 'sync', from: myName, role, myAnswers, currentQ });
+
+    connected = true;
+    wasConnected = true;
+    setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected, waiting for peer...');
+    $('e2eTag').style.display = '';
+    if (isAdmin) $('adminBadge').classList.remove('hidden');
+
+    $('setupPhase').classList.add('hidden');
+    $('joinPhase').classList.add('hidden');
+    $('questionPhase').classList.remove('hidden');
+    renderQuestion();
+  } catch (err) {
+    showError('errorArea', 'Failed to reconnect: ' + err.message);
+    clearSavedSession();
+    $('setupPhase').classList.remove('hidden');
+  }
+}
 
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -637,16 +757,29 @@ function connectMQTT() {
       reconnectPeriod: 3000,
     });
 
+    let resolved = false;
+
     client.on('connect', () => {
-      setStatus('connecting', 'Connected to relay, joining room...');
       client.subscribe(topic('+'), { qos: 1 }, err => {
-        if (err) { reject(err); return; }
-        resolve();
+        if (!resolved) {
+          resolved = true;
+          if (err) { reject(err); return; }
+          mqttReady = true;
+          resolve();
+        }
+        if (wasConnected) {
+          $('reconnectBanner').classList.remove('show');
+          setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected');
+          publish('sync', { type: 'sync', from: myName, role, myAnswers, currentQ });
+          if (role === 'host') {
+            publish('room', { type: 'room', questions, hostName: myName, adminEnabled: isAdmin });
+          }
+        }
       });
     });
 
     client.on('error', err => {
-      reject(err);
+      if (!resolved) { resolved = true; reject(err); }
     });
 
     client.on('message', async (t, message) => {
@@ -661,11 +794,16 @@ function connectMQTT() {
     });
 
     client.on('offline', () => {
-      if (connected) setStatus('connecting', 'Reconnecting...');
+      if (wasConnected) {
+        $('reconnectBanner').classList.add('show');
+        setStatus('connecting', 'Reconnecting...');
+      }
     });
 
     client.on('reconnect', () => {
-      if (connected) setStatus('connecting', 'Reconnecting...');
+      if (wasConnected) {
+        setStatus('connecting', 'Reconnecting...');
+      }
     });
   });
 }
@@ -682,24 +820,29 @@ function handleMessage(suffix, msg) {
     peerName = msg.hostName;
     hostHasAdmin = msg.adminEnabled || false;
     connected = true;
+    wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
     publish('join', { type: 'join', name: myName });
     startQuestionnaire();
+    saveSession();
   }
 
   if (suffix === 'join' && role === 'host') {
     peerName = msg.name;
     connected = true;
+    wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
     startQuestionnaire();
+    saveSession();
   }
 
   if (suffix === 'answers') {
     if (msg.from !== myName) {
       peerAnswers[msg.index] = msg.answer;
       delete peerPeek[msg.index];
+      saveSession();
       if (currentQ >= questions.length) {
         showResults();
       } else {
@@ -718,17 +861,42 @@ function handleMessage(suffix, msg) {
   if (suffix === 'chat') {
     if (!chatMessages[msg.index]) chatMessages[msg.index] = [];
     chatMessages[msg.index].push({ from: msg.from, text: msg.text, time: msg.time, isMine: msg.from === myName });
+    saveSession();
     if (msg.index === currentQ) appendChatBubble(msg.index, chatMessages[msg.index].length - 1);
   }
 
   if (suffix === 'ready') {
     if (msg.from !== myName) {
       peerReady[msg.index] = true;
-      if (myReady[msg.index]) {
+      saveSession();
+      if (myReady[msg.index] && !isAdmin) {
         advanceQuestion();
       } else {
         updateReadyBar(msg.index);
       }
+    }
+  }
+
+  if (suffix === 'navigate') {
+    if (msg.from !== myName) {
+      currentQ = msg.goTo;
+      saveSession();
+      $('questionPhase').classList.remove('hidden');
+      $('resultsPhase').classList.add('hidden');
+      renderQuestion();
+    }
+  }
+
+  if (suffix === 'sync') {
+    if (msg.from !== myName) {
+      if (!peerName) peerName = msg.from;
+      if (msg.myAnswers) {
+        for (const [k, v] of Object.entries(msg.myAnswers)) {
+          peerAnswers[k] = v;
+        }
+      }
+      saveSession();
+      if (connected) renderQuestion();
     }
   }
 }
@@ -758,6 +926,8 @@ async function createRoom() {
     $('shareLink').value = link;
     $('roomCodeDisplay').textContent = roomId;
     setStatus('connecting', 'Room created. Waiting for peer...');
+    wasConnected = true;
+    saveSession();
   } catch (err) {
     $('createBtn').disabled = false;
     $('createBtn').textContent = 'Create Room & Get Link';
@@ -833,13 +1003,21 @@ function renderQuestion() {
   const area = $('questionArea');
   area.innerHTML = '';
 
-  if (currentQ >= questions.length) {
+  if (currentQ >= questions.length && !isAdmin) {
     showResults();
     return;
   }
 
-  const pct = (currentQ / questions.length) * 100;
+  if (currentQ >= questions.length && isAdmin) {
+    currentQ = questions.length - 1;
+  }
+
+  const pct = ((Object.keys(myAnswers).length) / questions.length) * 100;
   $('progressFill').style.width = pct + '%';
+
+  if (isAdmin) {
+    area.appendChild(buildQuestionPicker());
+  }
 
   const i = currentQ;
   const myAns = myAnswers[i];
@@ -880,7 +1058,7 @@ function renderQuestion() {
     const ta = document.createElement('textarea');
     ta.id = 'ansText_' + i;
     ta.placeholder = 'Add a note (optional)...';
-    ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;resize:vertical;min-height:60px;font-family:inherit';
+    ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
     if (role === 'guest' && hostHasAdmin) {
       ta.oninput = () => {
         if (selectedRating !== null) {
@@ -919,13 +1097,13 @@ function renderQuestion() {
         } else {
           const badge = document.createElement('div');
           badge.className = 'waiting-badge';
-          badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to answer...`;
+          badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
           div.appendChild(badge);
         }
       } else {
         const badge = document.createElement('div');
         badge.className = 'waiting-badge';
-        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to answer...`;
+        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
         div.appendChild(badge);
       }
     } else {
@@ -938,26 +1116,63 @@ function renderQuestion() {
   if (isAdmin && peerPeek[i] !== undefined && myAnswers[i] === undefined) {
     updatePeekDisplay(i);
   }
+}
 
-  const inp = document.getElementById('ansInput_' + i);
-  if (inp) inp.focus();
+function buildQuestionPicker() {
+  const picker = document.createElement('div');
+  picker.className = 'q-picker';
+  picker.innerHTML = `<div class="q-picker-label">Admin — Choose Question</div>`;
+  const grid = document.createElement('div');
+  grid.className = 'q-picker-grid';
+
+  for (let i = 0; i < questions.length; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'q-picker-btn';
+    btn.textContent = i + 1;
+    if (i === currentQ) btn.classList.add('current');
+    if (myAnswers[i] !== undefined && peerAnswers[i] !== undefined) {
+      btn.classList.add('both-answered');
+    } else if (myAnswers[i] !== undefined) {
+      btn.classList.add('answered');
+    }
+    btn.onclick = () => {
+      currentQ = i;
+      publish('navigate', { type: 'navigate', goTo: i, from: myName });
+      saveSession();
+      renderQuestion();
+    };
+    grid.appendChild(btn);
+  }
+
+  picker.appendChild(grid);
+
+  const allDone = questions.every((_, i) => myAnswers[i] !== undefined && peerAnswers[i] !== undefined);
+  if (allDone) {
+    const resultsBtn = document.createElement('button');
+    resultsBtn.textContent = 'See All Results';
+    resultsBtn.style.cssText = 'margin-top:10px;width:100%';
+    resultsBtn.onclick = () => showResults();
+    picker.appendChild(resultsBtn);
+  }
+
+  return picker;
 }
 
 function updatePeekDisplay(index) {
   if (index !== currentQ) return;
   const existing = document.getElementById('peekDisplay');
-  const peek = peerPeek[index];
-  if (peek === undefined) { if (existing) existing.remove(); return; }
-  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peek)}`;
+  const pk = peerPeek[index];
+  if (pk === undefined) { if (existing) existing.remove(); return; }
+  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(pk)}`;
   if (existing) {
     existing.innerHTML = html;
   } else {
-    const peek = document.createElement('div');
-    peek.className = 'peek-box';
-    peek.id = 'peekDisplay';
-    peek.innerHTML = html;
+    const el = document.createElement('div');
+    el.className = 'peek-box';
+    el.id = 'peekDisplay';
+    el.innerHTML = html;
     const card = document.querySelector('.question-card');
-    if (card) card.appendChild(peek);
+    if (card) card.appendChild(el);
   }
 }
 
@@ -968,6 +1183,7 @@ function submitAnswer(index) {
   myAnswers[index] = ans;
   publish('answers', { type: 'answer', index, answer: ans, from: myName });
   selectedRating = null;
+  saveSession();
   renderQuestion();
 }
 
@@ -1003,28 +1219,13 @@ function buildChat(index, myAns, peerAns) {
   header.innerHTML = `Question ${index + 1} — Discussion`;
   wrap.appendChild(header);
 
-  const readyBar = document.createElement('div');
-  readyBar.className = 'ready-bar';
-  readyBar.id = 'readyBar_' + index;
-
-  if (myReady[index]) {
-    readyBar.innerHTML = peerReady[index]
-      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
-      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
-  } else {
-    const readyBtn = document.createElement('button');
-    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
-    readyBtn.onclick = () => markReady(index);
-    readyBar.appendChild(readyBtn);
-    if (peerReady[index]) {
-      const note = document.createElement('div');
-      note.className = 'ready-status ready-check';
-      note.textContent = `${peerName} is ready!`;
-      note.style.flex = '1';
-      readyBar.appendChild(note);
-    }
+  if (!isAdmin) {
+    const readyBar = document.createElement('div');
+    readyBar.className = 'ready-bar';
+    readyBar.id = 'readyBar_' + index;
+    buildReadyBarContent(readyBar, index);
+    wrap.appendChild(readyBar);
   }
-  wrap.appendChild(readyBar);
 
   const msgs = document.createElement('div');
   msgs.className = 'chat-messages';
@@ -1076,6 +1277,27 @@ function buildChat(index, myAns, peerAns) {
   return wrap;
 }
 
+function buildReadyBarContent(bar, index) {
+  bar.innerHTML = '';
+  if (myReady[index]) {
+    bar.innerHTML = peerReady[index]
+      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
+      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
+  } else {
+    const readyBtn = document.createElement('button');
+    readyBtn.textContent = 'Ready for Next ✓';
+    readyBtn.onclick = () => markReady(index);
+    bar.appendChild(readyBtn);
+    if (peerReady[index]) {
+      const note = document.createElement('div');
+      note.className = 'ready-status ready-check';
+      note.textContent = `${peerName} is ready!`;
+      note.style.flex = '1';
+      bar.appendChild(note);
+    }
+  }
+}
+
 function appendChatBubble(index, msgIdx) {
   const msgs = document.getElementById('chatMessages_' + index);
   if (!msgs) return;
@@ -1098,6 +1320,7 @@ function sendChat(index) {
   if (!chatMessages[index]) chatMessages[index] = [];
   chatMessages[index].push({ from: myName, text, time, isMine: true });
   publish('chat', { type: 'chat', index, from: myName, text, time });
+  saveSession();
 
   const msgs = document.getElementById('chatMessages_' + index);
   if (msgs) {
@@ -1112,6 +1335,7 @@ function sendChat(index) {
 function markReady(index) {
   myReady[index] = true;
   publish('ready', { type: 'ready', index, from: myName });
+  saveSession();
   if (peerReady[index]) {
     advanceQuestion();
   } else {
@@ -1122,33 +1346,16 @@ function markReady(index) {
 function updateReadyBar(index) {
   const bar = document.getElementById('readyBar_' + index);
   if (!bar) return;
-  bar.innerHTML = '';
-
-  if (myReady[index]) {
-    bar.innerHTML = peerReady[index]
-      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
-      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
-  } else {
-    const readyBtn = document.createElement('button');
-    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
-    readyBtn.onclick = () => markReady(index);
-    bar.appendChild(readyBtn);
-    if (peerReady[index]) {
-      const note = document.createElement('div');
-      note.className = 'ready-status ready-check';
-      note.textContent = `${peerName} is ready!`;
-      note.style.flex = '1';
-      bar.appendChild(note);
-    }
-  }
+  buildReadyBarContent(bar, index);
 }
 
 function advanceQuestion() {
-  if (currentQ < questions.length - 1) {
-    currentQ++;
-    renderQuestion();
-  } else {
+  currentQ++;
+  saveSession();
+  if (currentQ >= questions.length) {
     showResults();
+  } else {
+    renderQuestion();
   }
 }
 
@@ -1159,16 +1366,24 @@ function allPeerAnswered() {
   return true;
 }
 
+function allMyAnswered() {
+  for (let i = 0; i < questions.length; i++) {
+    if (myAnswers[i] === undefined) return false;
+  }
+  return true;
+}
+
 function showResults() {
   $('questionPhase').classList.add('hidden');
   $('resultsPhase').classList.remove('hidden');
   const area = $('resultsArea');
   area.innerHTML = '';
 
-  if (!allPeerAnswered()) {
+  if (!allPeerAnswered() || !allMyAnswered()) {
     const waiting = document.createElement('div');
     waiting.className = 'card';
-    waiting.innerHTML = `<div class="waiting-badge" style="justify-content:center"><span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to finish all questions...</div>`;
+    const who = !allMyAnswered() ? 'you' : escHtml(peerName);
+    waiting.innerHTML = `<div class="waiting-badge" style="justify-content:center"><span class="status-dot connecting"></span> Waiting for ${who} to finish all questions...</div>`;
     area.appendChild(waiting);
     return;
   }
@@ -1199,8 +1414,15 @@ function escHtml(s) {
 
 // --- Init ---
 (function init() {
-  roomId = getRoomFromURL();
-  if (roomId) {
+  const saved = loadSession();
+  const urlRoom = getRoomFromURL();
+
+  if (saved && (saved.roomId === urlRoom || !urlRoom)) {
+    $('setupPhase').classList.add('hidden');
+    $('resumePhase').classList.remove('hidden');
+    $('resumeInfo').textContent = `Room: ${saved.roomId} | ${saved.role === 'host' ? 'Host' : 'Guest'}: ${saved.myName}${saved.peerName ? ' with ' + saved.peerName : ''}`;
+  } else if (urlRoom) {
+    roomId = urlRoom;
     $('setupPhase').classList.add('hidden');
     $('joinPhase').classList.remove('hidden');
   }
