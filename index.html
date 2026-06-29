@@ -753,7 +753,7 @@ function handleMessage(suffix, msg) {
       questionText: msg.questionText, answers: {}, chat: [], ready: { host:false, guest:false } };
     rounds.push(r);
     currentRound = rounds.length - 1;
-    usedQuestions[msg.set].push(msg.index);
+    if (msg.set >= 0) usedQuestions[msg.set].push(msg.index);
     phase = 'answering';
     whoseTurn = msg.nextTurn;
     saveSession(); renderGame();
@@ -937,6 +937,32 @@ function renderPickingPhase(area) {
     setDiv.appendChild(list);
     area.appendChild(setDiv);
   });
+
+  if (isMyTurn()) {
+    const customDiv = document.createElement('div');
+    customDiv.className = 'q-set';
+    const ctitle = document.createElement('div');
+    ctitle.className = 'q-set-title';
+    ctitle.style.color = 'var(--orange)';
+    ctitle.innerHTML = '&#9997;&#65039; Ask your own question';
+    customDiv.appendChild(ctitle);
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.id = 'customQ';
+    inp.placeholder = 'Type a custom question...';
+    inp.style.cssText = 'flex:1';
+    inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
+    const btn = document.createElement('button');
+    btn.textContent = 'Ask';
+    btn.onclick = () => { if (inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
+    row.appendChild(inp);
+    row.appendChild(btn);
+    customDiv.appendChild(row);
+    area.appendChild(customDiv);
+  }
 }
 
 function pickQuestion(setIdx, qIdx) {
@@ -958,6 +984,23 @@ function pickQuestion(setIdx, qIdx) {
   renderGame();
 }
 
+function pickCustomQuestion(text) {
+  const r = {
+    set: -1, index: -1, pickerRole: role,
+    questionText: text,
+    answers: {}, chat: [], ready: { host: false, guest: false }
+  };
+  rounds.push(r);
+  currentRound = rounds.length - 1;
+  phase = 'answering';
+
+  const nextTurn = whoseTurn === 'host' ? 'guest' : 'host';
+  publish('pick', { type:'pick', set:-1, index:-1, pickerRole:role, questionText:text, from:myName, nextTurn });
+  whoseTurn = nextTurn;
+  saveSession();
+  renderGame();
+}
+
 function renderAnsweringPhase(area) {
   const r = rounds[currentRound];
   if (!r) return;
@@ -971,7 +1014,7 @@ function renderAnsweringPhase(area) {
   const pickerName = iAmPicker ? 'You' : escHtml(peerName);
   const respondentName = iAmPicker ? escHtml(peerName) : 'You';
   div.innerHTML = `
-    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
+    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · ${r.set >= 0 ? 'Set ' + (r.set === 0 ? 'A' : 'B') : 'Custom'}</div>
     <div class="question-text">${escHtml(r.questionText)}</div>
   `;
 
@@ -1051,7 +1094,7 @@ function renderChattingPhase(area) {
   div.className = 'question-card';
   const pickerName = r.pickerRole === role ? 'You' : escHtml(peerName);
   div.innerHTML = `
-    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
+    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · ${r.set >= 0 ? 'Set ' + (r.set === 0 ? 'A' : 'B') : 'Custom'}</div>
     <div class="question-text">${escHtml(r.questionText)}</div>
   `;
   div.appendChild(buildChat(currentRound, respondentAns));
@@ -1235,7 +1278,7 @@ function showResults() {
 
     div.innerHTML = `
       <div class="q" style="margin-bottom:8px">
-        <span style="color:var(--text-dim);font-size:0.75rem">Round ${i+1} · Set ${r.set===0?'A':'B'} · Asked by ${escHtml(pickerRoleName)}</span><br>
+        <span style="color:var(--text-dim);font-size:0.75rem">Round ${i+1} · ${r.set>=0?'Set '+(r.set===0?'A':'B'):'Custom'} · Asked by ${escHtml(pickerRoleName)}</span><br>
         ${escHtml(r.questionText)}
       </div>
       <div class="answer-display peer">
