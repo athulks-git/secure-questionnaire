@@ -622,7 +622,7 @@ function handleMessage(suffix, msg) {
 
   if (suffix === 'peek' && isAdmin) {
     if (msg.from !== myName) {
-      peerPeek[msg.index] = msg.rating;
+      peerPeek[msg.index] = { rating: msg.rating, text: msg.text || '' };
       updatePeekDisplay(msg.index);
     }
   }
@@ -764,38 +764,56 @@ function renderQuestion() {
         bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
         rb.classList.add('selected');
         if (role === 'guest' && hostHasAdmin) {
-          publish('peek', { type: 'peek', index: i, rating: r.value, from: myName });
+          publish('peek', { type: 'peek', index: i, rating: r.value, text: '', from: myName });
         }
-        submitAnswer(i);
       };
       bar.appendChild(rb);
     });
 
     div.appendChild(bar);
 
+    const ta = document.createElement('textarea');
+    ta.id = 'ansText_' + i;
+    ta.placeholder = 'Add a note (optional)...';
+    ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.88rem;resize:vertical;min-height:60px;font-family:inherit';
+    if (role === 'guest' && hostHasAdmin) {
+      ta.oninput = () => {
+        if (selectedRating !== null) {
+          publish('peek', { type: 'peek', index: i, rating: selectedRating, text: ta.value, from: myName });
+        }
+      };
+    }
+    div.appendChild(ta);
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Submit';
+    btn.style.cssText = 'margin-top:10px;width:100%';
+    btn.onclick = () => submitAnswer(i);
+    div.appendChild(btn);
+
     if (isAdmin && peerAns !== undefined) {
       const peerDiv = document.createElement('div');
       peerDiv.className = 'answer-display peer';
       peerDiv.style.marginTop = '12px';
-      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
+      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
       div.appendChild(peerDiv);
     }
   } else {
     const myDiv = document.createElement('div');
     myDiv.className = 'answer-display you';
-    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${ratingHtml(myAns)}`;
+    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
     div.appendChild(myDiv);
 
     if (isAdmin) {
       if (peerAns !== undefined) {
         const peerDiv = document.createElement('div');
         peerDiv.className = 'answer-display peer';
-        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${ratingHtml(peerAns)}`;
+        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
         div.appendChild(peerDiv);
       } else if (peerPeek[i] !== undefined) {
         const peerDiv = document.createElement('div');
         peerDiv.className = 'answer-display peer';
-        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(peerPeek[i])}`;
+        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[i])}`;
         div.appendChild(peerDiv);
       }
     }
@@ -829,9 +847,9 @@ function renderQuestion() {
 function updatePeekDisplay(index) {
   if (index !== currentQ) return;
   const existing = document.getElementById('peekDisplay');
-  const rating = peerPeek[index];
-  if (rating === undefined) { if (existing) existing.remove(); return; }
-  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${ratingHtml(rating)}`;
+  const peek = peerPeek[index];
+  if (peek === undefined) { if (existing) existing.remove(); return; }
+  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peek)}`;
   if (existing) {
     existing.innerHTML = html;
   } else {
@@ -846,16 +864,34 @@ function updatePeekDisplay(index) {
 
 function submitAnswer(index) {
   if (selectedRating === null) return;
-  myAnswers[index] = selectedRating;
-  publish('answers', { type: 'answer', index, answer: selectedRating, from: myName });
+  const text = (document.getElementById('ansText_' + index) || {}).value || '';
+  const ans = { rating: selectedRating, text: text.trim() };
+  myAnswers[index] = ans;
+  publish('answers', { type: 'answer', index, answer: ans, from: myName });
   selectedRating = null;
   renderQuestion();
 }
 
 function ratingHtml(value) {
-  const r = RATINGS.find(r => r.value === value);
-  if (!r) return escHtml(String(value));
+  const v = (typeof value === 'object') ? value.rating : value;
+  const r = RATINGS.find(r => r.value === v);
+  if (!r) return escHtml(String(v));
   return `<div class="rating-display"><span class="rating-emoji">${r.emoji}</span> ${escHtml(r.label)}</div>`;
+}
+
+function answerHtml(ans) {
+  if (!ans) return '';
+  const a = (typeof ans === 'object') ? ans : { rating: ans, text: '' };
+  let html = ratingHtml(a.rating);
+  if (a.text) html += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(a.text)}"</div>`;
+  return html;
+}
+
+function peekHtml(peek) {
+  if (!peek) return '';
+  let html = ratingHtml(peek.rating);
+  if (peek.text) html += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(peek.text)}"</div>`;
+  return html;
 }
 
 function allPeerAnswered() {
@@ -886,11 +922,11 @@ function showResults() {
       <div class="q">${i + 1}. ${escHtml(questions[i])}</div>
       <div class="answer-display you">
         <div class="who">You (${escHtml(myName)})</div>
-        ${ratingHtml(myAnswers[i])}
+        ${answerHtml(myAnswers[i])}
       </div>
       <div class="answer-display peer">
         <div class="who">${escHtml(peerName)}</div>
-        ${ratingHtml(peerAnswers[i])}
+        ${answerHtml(peerAnswers[i])}
       </div>
     `;
     area.appendChild(div);
