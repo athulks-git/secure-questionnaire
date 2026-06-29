@@ -295,6 +295,89 @@
     line-height: 1.6;
   }
 
+  .chat-container {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-top: 12px;
+  }
+
+  .chat-header {
+    padding: 12px 16px; background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem; color: var(--text-dim);
+  }
+  .chat-header .q-text { color: var(--text); font-weight: 600; font-size: 0.9rem; margin-top: 4px; }
+
+  .chat-messages {
+    padding: 12px 16px; min-height: 200px; max-height: 400px;
+    overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .chat-bubble {
+    max-width: 80%; padding: 10px 14px; border-radius: 16px;
+    font-size: 0.85rem; line-height: 1.4; position: relative;
+    word-wrap: break-word;
+  }
+  .chat-bubble .bubble-name {
+    font-size: 0.7rem; font-weight: 600; margin-bottom: 3px;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .chat-bubble .bubble-time {
+    font-size: 0.65rem; opacity: 0.6; margin-top: 3px; text-align: right;
+  }
+
+  .chat-bubble.mine {
+    align-self: flex-end; background: var(--accent);
+    color: white; border-bottom-right-radius: 4px;
+  }
+  .chat-bubble.mine .bubble-name { color: rgba(255,255,255,0.7); }
+
+  .chat-bubble.peer {
+    align-self: flex-start; background: var(--surface2);
+    border: 1px solid var(--border); border-bottom-left-radius: 4px;
+  }
+  .chat-bubble.peer .bubble-name { color: var(--green); }
+
+  .chat-bubble.system {
+    align-self: center; background: rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.2);
+    color: var(--text-dim); font-size: 0.78rem; text-align: center;
+    border-radius: 12px; max-width: 90%;
+  }
+
+  .chat-bubble .answer-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 8px; margin-top: 4px;
+    font-size: 0.82rem; font-weight: 600;
+  }
+  .chat-bubble.mine .answer-tag { background: rgba(255,255,255,0.15); }
+  .chat-bubble.peer .answer-tag { background: rgba(108, 92, 231, 0.1); }
+
+  .chat-input-row {
+    display: flex; gap: 8px; padding: 10px 12px;
+    border-top: 1px solid var(--border); background: var(--surface2);
+  }
+  .chat-input-row input {
+    flex: 1; padding: 10px 14px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 20px;
+    color: var(--text); font-size: 0.85rem; font-family: inherit; outline: none;
+  }
+  .chat-input-row input:focus { border-color: var(--accent); }
+  .chat-input-row button {
+    border-radius: 50%; width: 40px; height: 40px; padding: 0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  .ready-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px; border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .ready-bar button { flex: 1; }
+  .ready-bar .ready-status {
+    font-size: 0.78rem; color: var(--text-dim); text-align: center; width: 100%;
+  }
+  .ready-bar .ready-check { color: var(--green); font-weight: 600; }
+
   @media (max-width: 480px) {
     .container { padding: 12px; }
     header h1 { font-size: 1.3rem; }
@@ -430,6 +513,9 @@ let selectedRating = null;
 let isAdmin = false;
 let hostHasAdmin = false;
 let peerPeek = {};
+let chatMessages = {};
+let myReady = {};
+let peerReady = {};
 
 const RATINGS = [
   { value: 0, emoji: '👎', label: 'Not Interested' },
@@ -626,6 +712,23 @@ function handleMessage(suffix, msg) {
       updatePeekDisplay(msg.index);
     }
   }
+
+  if (suffix === 'chat') {
+    if (!chatMessages[msg.index]) chatMessages[msg.index] = [];
+    chatMessages[msg.index].push({ from: msg.from, text: msg.text, time: msg.time, isMine: msg.from === myName });
+    if (msg.index === currentQ) appendChatBubble(msg.index, chatMessages[msg.index].length - 1);
+  }
+
+  if (suffix === 'ready') {
+    if (msg.from !== myName) {
+      peerReady[msg.index] = true;
+      if (myReady[msg.index]) {
+        advanceQuestion();
+      } else {
+        updateReadyBar(msg.index);
+      }
+    }
+  }
 }
 
 // --- Host ---
@@ -799,39 +902,33 @@ function renderQuestion() {
       div.appendChild(peerDiv);
     }
   } else {
-    const myDiv = document.createElement('div');
-    myDiv.className = 'answer-display you';
-    myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
-    div.appendChild(myDiv);
+    if (!bothAnswered) {
+      const myDiv = document.createElement('div');
+      myDiv.className = 'answer-display you';
+      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
+      div.appendChild(myDiv);
 
-    if (isAdmin) {
-      if (peerAns !== undefined) {
-        const peerDiv = document.createElement('div');
-        peerDiv.className = 'answer-display peer';
-        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
-        div.appendChild(peerDiv);
-      } else if (peerPeek[i] !== undefined) {
-        const peerDiv = document.createElement('div');
-        peerDiv.className = 'answer-display peer';
-        peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[i])}`;
-        div.appendChild(peerDiv);
+      if (isAdmin) {
+        if (peerPeek[i] !== undefined) {
+          const peerDiv = document.createElement('div');
+          peerDiv.className = 'answer-display peer';
+          peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[i])}`;
+          div.appendChild(peerDiv);
+        } else {
+          const badge = document.createElement('div');
+          badge.className = 'waiting-badge';
+          badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to answer...`;
+          div.appendChild(badge);
+        }
+      } else {
+        const badge = document.createElement('div');
+        badge.className = 'waiting-badge';
+        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName)} to answer...`;
+        div.appendChild(badge);
       }
-    }
-
-    const nextBtn = document.createElement('button');
-    nextBtn.style.marginTop = '16px';
-    nextBtn.style.width = '100%';
-    nextBtn.style.padding = '14px 20px';
-    nextBtn.style.fontSize = '1rem';
-
-    if (currentQ < questions.length - 1) {
-      nextBtn.textContent = 'Next Question →';
-      nextBtn.onclick = () => { currentQ++; renderQuestion(); };
     } else {
-      nextBtn.textContent = 'See All Results';
-      nextBtn.onclick = () => showResults();
+      div.appendChild(buildChat(i, myAns, peerAns));
     }
-    div.appendChild(nextBtn);
   }
 
   area.appendChild(div);
@@ -892,6 +989,165 @@ function peekHtml(peek) {
   let html = ratingHtml(peek.rating);
   if (peek.text) html += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(peek.text)}"</div>`;
   return html;
+}
+
+function buildChat(index, myAns, peerAns) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-container';
+  wrap.id = 'chatContainer_' + index;
+
+  const header = document.createElement('div');
+  header.className = 'chat-header';
+  header.innerHTML = `Question ${index + 1} — Discussion`;
+  wrap.appendChild(header);
+
+  const msgs = document.createElement('div');
+  msgs.className = 'chat-messages';
+  msgs.id = 'chatMessages_' + index;
+
+  const myR = RATINGS.find(r => r.value === (typeof myAns === 'object' ? myAns.rating : myAns));
+  const peerR = RATINGS.find(r => r.value === (typeof peerAns === 'object' ? peerAns.rating : peerAns));
+
+  const myBubble = document.createElement('div');
+  myBubble.className = 'chat-bubble mine';
+  let myContent = `<div class="bubble-name">You</div><div class="answer-tag">${myR ? myR.emoji : ''} ${myR ? escHtml(myR.label) : ''}</div>`;
+  if (typeof myAns === 'object' && myAns.text) myContent += `<div style="margin-top:6px">${escHtml(myAns.text)}</div>`;
+  myBubble.innerHTML = myContent;
+  msgs.appendChild(myBubble);
+
+  const peerBubble = document.createElement('div');
+  peerBubble.className = 'chat-bubble peer';
+  let peerContent = `<div class="bubble-name">${escHtml(peerName)}</div><div class="answer-tag">${peerR ? peerR.emoji : ''} ${peerR ? escHtml(peerR.label) : ''}</div>`;
+  if (typeof peerAns === 'object' && peerAns.text) peerContent += `<div style="margin-top:6px">${escHtml(peerAns.text)}</div>`;
+  peerBubble.innerHTML = peerContent;
+  msgs.appendChild(peerBubble);
+
+  if (chatMessages[index]) {
+    chatMessages[index].forEach(m => {
+      const b = document.createElement('div');
+      b.className = 'chat-bubble ' + (m.isMine ? 'mine' : 'peer');
+      b.innerHTML = `<div class="bubble-name">${m.isMine ? 'You' : escHtml(peerName)}</div>${escHtml(m.text)}<div class="bubble-time">${m.time}</div>`;
+      msgs.appendChild(b);
+    });
+  }
+
+  wrap.appendChild(msgs);
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 0);
+
+  const inputRow = document.createElement('div');
+  inputRow.className = 'chat-input-row';
+  const chatInput = document.createElement('input');
+  chatInput.type = 'text';
+  chatInput.id = 'chatInput_' + index;
+  chatInput.placeholder = 'Type a message...';
+  chatInput.onkeydown = e => { if (e.key === 'Enter') sendChat(index); };
+  const sendBtn = document.createElement('button');
+  sendBtn.innerHTML = '&#10148;';
+  sendBtn.onclick = () => sendChat(index);
+  inputRow.appendChild(chatInput);
+  inputRow.appendChild(sendBtn);
+  wrap.appendChild(inputRow);
+
+  const readyBar = document.createElement('div');
+  readyBar.className = 'ready-bar';
+  readyBar.id = 'readyBar_' + index;
+
+  if (myReady[index]) {
+    readyBar.innerHTML = peerReady[index]
+      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
+      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
+  } else {
+    const readyBtn = document.createElement('button');
+    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
+    readyBtn.onclick = () => markReady(index);
+    readyBar.appendChild(readyBtn);
+    if (peerReady[index]) {
+      const note = document.createElement('div');
+      note.className = 'ready-status ready-check';
+      note.textContent = `${peerName} is ready!`;
+      note.style.flex = '1';
+      readyBar.appendChild(note);
+    }
+  }
+
+  wrap.appendChild(readyBar);
+  return wrap;
+}
+
+function appendChatBubble(index, msgIdx) {
+  const msgs = document.getElementById('chatMessages_' + index);
+  if (!msgs) return;
+  const m = chatMessages[index][msgIdx];
+  if (m.isMine) return;
+  const b = document.createElement('div');
+  b.className = 'chat-bubble peer';
+  b.innerHTML = `<div class="bubble-name">${escHtml(peerName)}</div>${escHtml(m.text)}<div class="bubble-time">${m.time}</div>`;
+  msgs.appendChild(b);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendChat(index) {
+  const input = document.getElementById('chatInput_' + index);
+  if (!input || !input.value.trim()) return;
+  const text = input.value.trim();
+  input.value = '';
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  if (!chatMessages[index]) chatMessages[index] = [];
+  chatMessages[index].push({ from: myName, text, time, isMine: true });
+  publish('chat', { type: 'chat', index, from: myName, text, time });
+
+  const msgs = document.getElementById('chatMessages_' + index);
+  if (msgs) {
+    const b = document.createElement('div');
+    b.className = 'chat-bubble mine';
+    b.innerHTML = `<div class="bubble-name">You</div>${escHtml(text)}<div class="bubble-time">${time}</div>`;
+    msgs.appendChild(b);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+
+function markReady(index) {
+  myReady[index] = true;
+  publish('ready', { type: 'ready', index, from: myName });
+  if (peerReady[index]) {
+    advanceQuestion();
+  } else {
+    updateReadyBar(index);
+  }
+}
+
+function updateReadyBar(index) {
+  const bar = document.getElementById('readyBar_' + index);
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  if (myReady[index]) {
+    bar.innerHTML = peerReady[index]
+      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
+      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
+  } else {
+    const readyBtn = document.createElement('button');
+    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
+    readyBtn.onclick = () => markReady(index);
+    bar.appendChild(readyBtn);
+    if (peerReady[index]) {
+      const note = document.createElement('div');
+      note.className = 'ready-status ready-check';
+      note.textContent = `${peerName} is ready!`;
+      note.style.flex = '1';
+      bar.appendChild(note);
+    }
+  }
+}
+
+function advanceQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
 }
 
 function allPeerAnswered() {
