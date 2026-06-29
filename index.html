@@ -840,20 +840,34 @@ async function joinRoom() {
   try {
     await connectMQTT();
     setStatus('connecting', 'Waiting for room data...');
-    // Request room data from host (retained message may not arrive on public brokers)
-    publish('joinreq', { type:'joinreq', name:myName });
+    // Aggressively retry: resubscribe forces broker to resend retained messages,
+    // and joinreq asks the host to republish room data
     let retries = 0;
-    const retryInterval = setInterval(() => {
-      if (connected) { clearInterval(retryInterval); return; }
+    const tryGetRoom = () => {
+      if (connected) return;
       retries++;
-      if (retries >= 5) {
-        clearInterval(retryInterval);
+      if (retries > 8) {
         showError('joinError', 'Room data not received. Check passphrase and make sure the host is online.');
         $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
         return;
       }
-      publish('joinreq', { type:'joinreq', name:myName });
-    }, 3000);
+      // Resubscribe to force broker to resend retained messages
+      client.unsubscribe(topic('+'), () => {
+        if (connected) return;
+        client.subscribe(topic('+'), { qos: 1 }, () => {
+          if (connected) return;
+          publish('joinreq', { type:'joinreq', name:myName });
+          setTimeout(tryGetRoom, 2000);
+        });
+      });
+    };
+    // First attempt after a short delay for any in-flight retained message
+    setTimeout(() => {
+      if (!connected) {
+        publish('joinreq', { type:'joinreq', name:myName });
+        setTimeout(tryGetRoom, 2000);
+      }
+    }, 500);
   } catch (err) {
     $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
     showError('joinError', 'Failed: ' + err.message);
