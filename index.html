@@ -194,20 +194,30 @@
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
-  .rating-bar { display: flex; gap: 12px; margin-top: 4px; }
-
-  .rating-btn {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 16px; background: var(--surface2);
-    border: 2px solid var(--border); border-radius: 10px;
-    color: var(--text-dim); font-size: 1rem; font-weight: 500;
-    cursor: pointer; transition: all 0.2s;
+  .hotness-slider-wrap { margin-top: 8px; }
+  .hotness-label-row {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
   }
-  .rating-btn .rating-emoji { font-size: 1.5rem; flex-shrink: 0; }
-  .rating-btn:hover { border-color: var(--accent); background: rgba(0, 148, 255, 0.08); color: var(--text); }
-  .rating-btn.selected { color: var(--text); }
-  .rating-btn.r0.selected { border-color: var(--red); background: rgba(231, 76, 60, 0.15); }
-  .rating-btn.r1.selected { border-color: var(--green); background: rgba(46, 204, 113, 0.15); }
+  .hotness-emoji { font-size: 1.8rem; text-align: center; min-width: 50px; }
+  .hotness-level { font-weight: 700; font-size: 1rem; }
+  .hotness-slider {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+    border-radius: 4px; outline: none; cursor: pointer;
+    background: linear-gradient(to right, #3498db, #2ecc71, #f1c40f, #e67e22, #e74c3c);
+  }
+  .hotness-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 28px; height: 28px;
+    border-radius: 50%; background: #fff; border: 3px solid var(--accent);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer;
+  }
+  .hotness-slider::-moz-range-thumb {
+    width: 28px; height: 28px; border-radius: 50%; background: #fff;
+    border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer;
+  }
+  .hotness-ticks {
+    display: flex; justify-content: space-between; margin-top: 6px;
+    font-size: 0.7rem; color: var(--text-dim); padding: 0 2px;
+  }
 
   .rating-display {
     display: inline-flex; align-items: center; gap: 8px;
@@ -399,9 +409,8 @@
     .container { padding: 12px 0; }
     header h1 { font-size: 1.3rem; }
     .room-code { font-size: 1.4rem; }
-    .rating-bar { gap: 8px; }
-    .rating-btn { padding: 14px 10px; font-size: 0.9rem; gap: 8px; }
-    .rating-btn .rating-emoji { font-size: 1.3rem; }
+    .hotness-slider::-webkit-slider-thumb { width: 32px; height: 32px; }
+    .hotness-slider::-moz-range-thumb { width: 32px; height: 32px; }
     .question-card { padding: 16px; }
     .chat-container { margin: 12px -16px -16px -16px; }
   }
@@ -570,9 +579,12 @@ let peerPeek = {};
 let pickTimer = null;
 let pickDeadline = 0;
 
-const RATINGS = [
-  { value: 0, emoji: '\u{1F44E}', label: 'Not Interested' },
-  { value: 1, emoji: '\u{1F44D}', label: 'Interested' },
+const HOTNESS = [
+  { value: 1, emoji: '\u{2744}\u{FE0F}', label: 'Ice Cold' },
+  { value: 2, emoji: '\u{1F32C}\u{FE0F}', label: 'Cool' },
+  { value: 3, emoji: '\u{1F321}\u{FE0F}', label: 'Warm' },
+  { value: 4, emoji: '\u{1F525}', label: 'Hot' },
+  { value: 5, emoji: '\u{1F525}\u{1F525}', label: 'On Fire' },
 ];
 
 function $(id) { return document.getElementById(id); }
@@ -1125,25 +1137,41 @@ function renderAnsweringPhase(area) {
       phase = 'chatting'; saveSession();
       div.appendChild(buildChat(currentRound, respondentAns));
     } else {
-      selectedRating = null;
-      const bar = document.createElement('div');
-      bar.className = 'rating-bar';
+      selectedRating = 3;
+      const wrap = document.createElement('div');
+      wrap.className = 'hotness-slider-wrap';
 
-      RATINGS.forEach(rt => {
-        const rb = document.createElement('button');
-        rb.className = `rating-btn r${rt.value}`;
-        rb.innerHTML = `<span class="rating-emoji">${rt.emoji}</span><span>${rt.label}</span>`;
-        rb.onclick = () => {
-          selectedRating = rt.value;
-          bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
-          rb.classList.add('selected');
-          if (role === 'guest' && hostHasAdmin) {
-            publish('peek', { type:'peek', round:currentRound, rating:rt.value, text:'', from:myName });
-          }
-        };
-        bar.appendChild(rb);
-      });
-      div.appendChild(bar);
+      const labelRow = document.createElement('div');
+      labelRow.className = 'hotness-label-row';
+      const emojiSpan = document.createElement('span');
+      emojiSpan.className = 'hotness-emoji';
+      emojiSpan.id = 'hotnessEmoji';
+      const levelSpan = document.createElement('span');
+      levelSpan.className = 'hotness-level';
+      levelSpan.id = 'hotnessLevel';
+      labelRow.appendChild(emojiSpan);
+      labelRow.appendChild(levelSpan);
+      wrap.appendChild(labelRow);
+
+      const slider = document.createElement('input');
+      slider.type = 'range'; slider.min = '1'; slider.max = '5'; slider.value = '3';
+      slider.className = 'hotness-slider'; slider.id = 'hotnessSlider';
+      slider.oninput = () => {
+        selectedRating = parseInt(slider.value);
+        updateHotnessLabel(selectedRating);
+        if (role === 'guest' && hostHasAdmin) {
+          publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:'', from:myName });
+        }
+      };
+      wrap.appendChild(slider);
+
+      const ticks = document.createElement('div');
+      ticks.className = 'hotness-ticks';
+      HOTNESS.forEach(h => { const t = document.createElement('span'); t.textContent = h.emoji; ticks.appendChild(t); });
+      wrap.appendChild(ticks);
+
+      updateHotnessLabel(3);
+      div.appendChild(wrap);
 
       const ta = document.createElement('textarea');
       ta.id = 'ansText';
@@ -1151,7 +1179,7 @@ function renderAnsweringPhase(area) {
       ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
       if (role === 'guest' && hostHasAdmin) {
         ta.oninput = () => {
-          if (selectedRating !== null) publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
+          publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
         };
       }
       div.appendChild(ta);
@@ -1185,7 +1213,7 @@ function renderChattingPhase(area) {
 }
 
 function submitAnswer() {
-  if (selectedRating === null) return;
+  if (selectedRating === null || selectedRating === undefined) return;
   const r = rounds[currentRound];
   const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
   const text = ($('ansText') || {}).value || '';
@@ -1198,11 +1226,19 @@ function submitAnswer() {
   renderGame();
 }
 
+function updateHotnessLabel(val) {
+  const h = HOTNESS.find(x => x.value === val) || HOTNESS[2];
+  const el = document.getElementById('hotnessEmoji');
+  const lv = document.getElementById('hotnessLevel');
+  if (el) el.textContent = h.emoji;
+  if (lv) { lv.textContent = h.label; lv.style.color = ['#3498db','#2ecc71','#f1c40f','#e67e22','#e74c3c'][val-1]; }
+}
+
 function ratingHtml(v) {
   const val = (typeof v === 'object') ? v.rating : v;
-  const r = RATINGS.find(x => x.value === val);
-  if (!r) return escHtml(String(val));
-  return `<div class="rating-display"><span class="rating-emoji">${r.emoji}</span> ${escHtml(r.label)}</div>`;
+  const h = HOTNESS.find(x => x.value === val);
+  if (!h) return escHtml(String(val));
+  return `<div class="rating-display"><span class="rating-emoji">${h.emoji}</span> ${escHtml(h.label)}</div>`;
 }
 
 function answerHtml(a) {
@@ -1247,7 +1283,7 @@ function buildChat(roundIdx, respondentAns) {
   msgs.id = 'chatMsgs_' + roundIdx;
 
   // Show the respondent's answer as the first bubble
-  const aR = RATINGS.find(x => x.value === (typeof respondentAns==='object'?respondentAns.rating:respondentAns));
+  const aR = HOTNESS.find(x => x.value === (typeof respondentAns==='object'?respondentAns.rating:respondentAns));
   const ab = document.createElement('div');
   ab.className = 'chat-bubble ' + (iAmRespondent ? 'mine' : 'peer');
   let ac = `<div class="bubble-name">${respondentDisplayName}'s answer</div><div class="answer-tag">${aR?aR.emoji:''} ${aR?escHtml(aR.label):''}</div>`;
