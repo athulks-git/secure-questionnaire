@@ -18,6 +18,7 @@
     --green: #2ecc71;
     --orange: #f39c12;
     --red: #e74c3c;
+    --purple: #9b59b6;
     --radius: 12px;
   }
 
@@ -46,8 +47,7 @@
   .status-bar {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 16px; background: var(--surface);
-    border-radius: 0; margin-bottom: 16px;
-    font-size: 0.82rem; border: none;
+    margin-bottom: 16px; font-size: 0.82rem;
   }
 
   .status-dot {
@@ -60,8 +60,7 @@
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   .card {
-    background: var(--surface); border: none;
-    border-radius: 0; padding: 20px; margin-bottom: 16px;
+    background: var(--surface); padding: 20px; margin-bottom: 16px;
   }
 
   .card h2 {
@@ -84,7 +83,7 @@
     color: var(--text); font-size: 16px; font-family: inherit;
     outline: none; transition: border-color 0.2s;
   }
-  input:focus { border-color: var(--accent); }
+  input:focus, textarea:focus { border-color: var(--accent); }
 
   button {
     padding: 10px 20px; background: var(--accent); color: white;
@@ -96,7 +95,7 @@
   button:active { transform: scale(0.98); }
   button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  button.secondary { background: var(--surface2); border: 1px solid var(--border); }
+  button.secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
   button.secondary:hover { background: var(--border); }
 
   .btn-row { display: flex; gap: 8px; margin-top: 12px; }
@@ -104,19 +103,18 @@
 
   .file-drop {
     border: 2px dashed var(--border); border-radius: var(--radius);
-    padding: 30px; text-align: center; cursor: pointer;
+    padding: 24px; text-align: center; cursor: pointer;
     transition: border-color 0.2s, background 0.2s; position: relative;
   }
   .file-drop:hover, .file-drop.dragover {
-    border-color: var(--accent); background: rgba(108, 92, 231, 0.05);
+    border-color: var(--accent); background: rgba(0, 148, 255, 0.05);
   }
   .file-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .file-drop .icon { font-size: 1.8rem; margin-bottom: 8px; }
-  .file-drop .label { font-size: 0.85rem; color: var(--text-dim); }
+  .file-drop .icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .file-drop .label { font-size: 0.82rem; color: var(--text-dim); }
 
   .question-card {
-    background: var(--surface); border: none;
-    border-radius: 0; padding: 24px; margin-bottom: 16px;
+    background: var(--surface); padding: 24px; margin-bottom: 16px;
   }
   .question-num {
     font-size: 0.75rem; color: var(--accent); font-weight: 600;
@@ -139,19 +137,9 @@
     border-radius: 20px; font-size: 0.78rem; color: var(--orange); margin-top: 10px;
   }
 
-  .progress-bar {
-    width: 100%; height: 4px; background: var(--surface2);
-    border-radius: 2px; margin-bottom: 16px; overflow: hidden;
-  }
-  .progress-bar .fill {
-    height: 100%; background: var(--accent);
-    border-radius: 2px; transition: width 0.4s ease;
-  }
-
   .results-section { margin-top: 8px; }
   .result-item {
-    background: var(--surface); border: none;
-    border-radius: 0; padding: 16px; margin-bottom: 10px;
+    background: var(--surface); padding: 16px; margin-bottom: 10px;
   }
   .result-item .q { font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
 
@@ -206,9 +194,7 @@
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
-  .rating-bar {
-    display: flex; gap: 12px; margin-top: 4px;
-  }
+  .rating-bar { display: flex; gap: 12px; margin-top: 4px; }
 
   .rating-btn {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -217,13 +203,9 @@
     color: var(--text-dim); font-size: 1rem; font-weight: 500;
     cursor: pointer; transition: all 0.2s;
   }
-
   .rating-btn .rating-emoji { font-size: 1.5rem; flex-shrink: 0; }
-
   .rating-btn:hover { border-color: var(--accent); background: rgba(0, 148, 255, 0.08); color: var(--text); }
-
   .rating-btn.selected { color: var(--text); }
-
   .rating-btn.r0.selected { border-color: var(--red); background: rgba(231, 76, 60, 0.15); }
   .rating-btn.r1.selected { border-color: var(--green); background: rgba(46, 204, 113, 0.15); }
 
@@ -231,7 +213,6 @@
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 0.92rem; margin-top: 2px;
   }
-
   .rating-display .rating-emoji { font-size: 1.3rem; }
 
   .admin-toggle {
@@ -240,22 +221,18 @@
     border: 1px solid rgba(231, 76, 60, 0.15); border-radius: 8px;
     margin-top: 12px; cursor: pointer; user-select: none;
   }
-
   .admin-toggle .toggle-track {
     width: 40px; height: 22px; border-radius: 11px;
     background: var(--border); position: relative;
     transition: background 0.2s; flex-shrink: 0;
   }
-
   .admin-toggle .toggle-track .toggle-thumb {
     width: 18px; height: 18px; border-radius: 50%;
     background: var(--text-dim); position: absolute;
     top: 2px; left: 2px; transition: all 0.2s;
   }
-
   .admin-toggle.active .toggle-track { background: var(--red); }
   .admin-toggle.active .toggle-track .toggle-thumb { left: 20px; background: white; }
-
   .admin-toggle .toggle-label { font-size: 0.82rem; color: var(--text-dim); }
   .admin-toggle.active .toggle-label { color: var(--red); }
 
@@ -271,33 +248,27 @@
     border: 1px dashed rgba(231, 76, 60, 0.25); border-radius: 8px;
     margin-top: 10px; font-size: 0.8rem; color: var(--text-dim);
   }
-
   .peek-box .peek-label {
     font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.5px; color: var(--red); margin-bottom: 4px;
   }
 
   .chat-container {
-    background: var(--surface); border: none;
-    overflow: hidden;
+    background: var(--surface); overflow: hidden;
     margin: 12px -24px -24px -24px;
   }
-
   .chat-header {
     padding: 12px 16px; background: var(--surface2);
     border-bottom: 1px solid var(--border);
     font-size: 0.8rem; color: var(--text-dim);
   }
-
   .chat-messages {
     padding: 12px 16px; min-height: 200px; max-height: 400px;
     overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
   }
-
   .chat-bubble {
     max-width: 80%; padding: 10px 14px; border-radius: 16px;
-    font-size: 0.85rem; line-height: 1.4; position: relative;
-    word-wrap: break-word;
+    font-size: 0.85rem; line-height: 1.4; word-wrap: break-word;
   }
   .chat-bubble .bubble-name {
     font-size: 0.7rem; font-weight: 600; margin-bottom: 3px;
@@ -306,26 +277,16 @@
   .chat-bubble .bubble-time {
     font-size: 0.65rem; opacity: 0.6; margin-top: 3px; text-align: right;
   }
-
   .chat-bubble.mine {
     align-self: flex-end; background: var(--accent);
     color: white; border-bottom-right-radius: 4px;
   }
   .chat-bubble.mine .bubble-name { color: rgba(255,255,255,0.7); }
-
   .chat-bubble.peer {
     align-self: flex-start; background: var(--surface2);
     border: 1px solid var(--border); border-bottom-left-radius: 4px;
   }
   .chat-bubble.peer .bubble-name { color: var(--green); }
-
-  .chat-bubble.system {
-    align-self: center; background: rgba(0, 148, 255, 0.1);
-    border: 1px solid rgba(0, 148, 255, 0.2);
-    color: var(--text-dim); font-size: 0.78rem; text-align: center;
-    border-radius: 12px; max-width: 90%;
-  }
-
   .chat-bubble .answer-tag {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 10px; border-radius: 8px; margin-top: 4px;
@@ -360,28 +321,50 @@
   }
   .ready-bar .ready-check { color: var(--green); font-weight: 600; }
 
-  .q-picker {
-    padding: 12px 16px; background: var(--surface2);
-    border-bottom: 1px solid var(--border);
+  .turn-banner {
+    padding: 14px 20px; text-align: center;
+    font-size: 0.9rem; font-weight: 600; margin-bottom: 16px;
   }
-  .q-picker-label {
-    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--red); margin-bottom: 8px;
+  .turn-banner.your-turn {
+    background: rgba(0, 148, 255, 0.1); color: var(--accent);
+    border: 1px solid rgba(0, 148, 255, 0.2);
   }
-  .q-picker-grid {
-    display: flex; flex-wrap: wrap; gap: 6px;
+  .turn-banner.their-turn {
+    background: rgba(243, 156, 18, 0.1); color: var(--orange);
+    border: 1px solid rgba(243, 156, 18, 0.2);
   }
-  .q-picker-btn {
-    width: 36px; height: 36px; padding: 0;
-    border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+
+  .q-set {
+    background: var(--surface); padding: 16px; margin-bottom: 12px;
+  }
+  .q-set-title {
+    font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 10px; display: flex;
+    align-items: center; gap: 6px;
+  }
+  .q-set-title.set-a { color: var(--accent); }
+  .q-set-title.set-b { color: var(--purple); }
+
+  .q-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .q-item {
+    padding: 12px 14px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.85rem; line-height: 1.4; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+  }
+  .q-item:hover { border-color: var(--accent); background: rgba(0,148,255,0.05); }
+  .q-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .q-item.disabled:hover { border-color: var(--border); background: var(--surface2); }
+  .q-item .q-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--border); color: var(--text-dim);
     display: flex; align-items: center; justify-content: center;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+    font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
   }
-  .q-picker-btn:hover { border-color: var(--accent); color: var(--text); background: rgba(0,148,255,0.08); }
-  .q-picker-btn.current { border-color: var(--accent); background: var(--accent); color: white; }
-  .q-picker-btn.answered { border-color: var(--green); color: var(--green); }
-  .q-picker-btn.both-answered { background: rgba(46,204,113,0.15); border-color: var(--green); color: var(--green); }
+  .q-item.used .q-num { background: var(--green); color: white; }
+  .q-item .q-label { flex: 1; }
+  .q-item .q-done { font-size: 0.7rem; color: var(--green); font-weight: 600; }
 
   .reconnect-banner {
     padding: 8px 16px; background: rgba(243, 156, 18, 0.1);
@@ -390,6 +373,11 @@
     display: none;
   }
   .reconnect-banner.show { display: block; }
+
+  .round-counter {
+    text-align: center; font-size: 0.78rem; color: var(--text-dim);
+    margin-bottom: 12px;
+  }
 
   @media (max-width: 480px) {
     .container { padding: 12px 0; }
@@ -432,7 +420,7 @@
 
     <div class="card">
       <h2><span class="step">2</span> Shared Passphrase</h2>
-      <p>Both participants must use the same passphrase. Share it separately (call, message, in person).</p>
+      <p>Both participants must use the same passphrase.</p>
       <div class="passphrase-row">
         <input type="password" id="passphrase" placeholder="Enter a shared secret passphrase">
         <button onclick="toggleVis('passphrase','passToggle')" class="secondary" id="passToggle">Show</button>
@@ -440,19 +428,34 @@
     </div>
 
     <div class="card" id="uploadCard">
-      <h2><span class="step">3</span> Upload Questionnaire</h2>
-      <p>Upload a text file with numbered questions (e.g. "1. What is your name?"). One question per line.</p>
-      <div class="file-drop" id="fileDrop">
-        <input type="file" accept=".txt,.text" id="fileInput">
-        <div class="icon">&#128196;</div>
-        <div class="label">Drop a .txt file here or click to browse</div>
+      <h2><span class="step">3</span> Upload Questionnaires</h2>
+      <p>Upload two text files — one for each player. Each person picks questions from these to ask the other.</p>
+
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Set A</div>
+          <div class="file-drop" id="fileDrop1">
+            <input type="file" accept=".txt,.text" id="fileInput1">
+            <div class="icon">&#128196;</div>
+            <div class="label" id="fileLabel1">Upload .txt</div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Set B</div>
+          <div class="file-drop" id="fileDrop2">
+            <input type="file" accept=".txt,.text" id="fileInput2">
+            <div class="icon">&#128196;</div>
+            <div class="label" id="fileLabel2">Upload .txt</div>
+          </div>
+        </div>
       </div>
-      <div id="filePreview" class="hidden" style="margin-top:12px">
-        <p id="fileInfo" style="color:var(--green)"></p>
+      <div id="filePreview" class="hidden" style="margin-top:8px">
+        <p id="fileInfo" style="color:var(--green);margin-bottom:0"></p>
       </div>
+
       <div class="admin-toggle" id="adminToggle" onclick="toggleAdmin()">
         <div class="toggle-track"><div class="toggle-thumb"></div></div>
-        <div class="toggle-label">Admin mode — see the other person's selection before they submit</div>
+        <div class="toggle-label">Admin mode — see answers before submission</div>
       </div>
       <div class="btn-row">
         <button onclick="createRoom()" id="createBtn" disabled>Create Room &amp; Get Link</button>
@@ -461,7 +464,7 @@
 
     <div class="card hidden" id="shareCard">
       <h2>&#127881; Room Created!</h2>
-      <p>Share this link with the other person. They just need to open it and enter the passphrase.</p>
+      <p>Share this link with the other person.</p>
       <div class="share-link-box">
         <input type="text" id="shareLink" readonly>
         <button onclick="copyLink()">Copy</button>
@@ -495,11 +498,10 @@
     </div>
   </div>
 
-  <!-- RESUME SESSION -->
+  <!-- RESUME -->
   <div id="resumePhase" class="hidden">
     <div class="card" style="text-align:center">
       <h2 style="justify-content:center">&#128260; Resume Session?</h2>
-      <p style="text-align:center">You have a previous session in progress.</p>
       <p id="resumeInfo" style="text-align:center;color:var(--accent)"></p>
       <div class="btn-row">
         <button onclick="resumeSession()">Resume</button>
@@ -508,19 +510,16 @@
     </div>
   </div>
 
-  <!-- QUESTIONNAIRE -->
-  <div id="questionPhase" class="hidden">
-    <div class="progress-bar">
-      <div class="fill" id="progressFill" style="width:0%"></div>
-    </div>
-    <div id="questionArea"></div>
+  <!-- GAME -->
+  <div id="gamePhase" class="hidden">
+    <div id="gameArea"></div>
   </div>
 
   <!-- RESULTS -->
   <div id="resultsPhase" class="hidden">
     <div class="card">
-      <h2>&#9989; All Questions Completed</h2>
-      <p>Here's a summary of all answers from both participants.</p>
+      <h2>&#9989; All Rounds Complete</h2>
+      <p>Here's a summary of all questions and answers.</p>
     </div>
     <div class="results-section" id="resultsArea"></div>
   </div>
@@ -528,28 +527,30 @@
 
 <script>
 const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-const SESSION_KEY = 'sq_session';
+const SESSION_KEY = 'sq_session_v2';
 
 let client = null;
 let role = null;
 let myName = '';
 let peerName = '';
-let questions = [];
-let myAnswers = {};
-let peerAnswers = {};
+let questions1 = [];
+let questions2 = [];
 let cryptoKey = null;
 let roomId = null;
 let connected = false;
-let currentQ = 0;
-let selectedRating = null;
 let isAdmin = false;
 let hostHasAdmin = false;
-let peerPeek = {};
-let chatMessages = {};
-let myReady = {};
-let peerReady = {};
 let mqttReady = false;
 let wasConnected = false;
+let selectedRating = null;
+
+// Turn-based state
+let rounds = [];        // [{set, index, pickerRole, answers:{host:{},guest:{}}, chat:[], ready:{host:false,guest:false}}]
+let currentRound = -1;  // index into rounds, -1 = picking phase
+let whoseTurn = 'host';  // who picks next
+let phase = 'picking';   // 'picking' | 'answering' | 'chatting'
+let usedQuestions = { 0: [], 1: [] }; // which questions have been used from each set
+let peerPeek = {};
 
 const RATINGS = [
   { value: 0, emoji: '\u{1F44E}', label: 'Not Interested' },
@@ -560,27 +561,23 @@ function $(id) { return document.getElementById(id); }
 
 // --- Session persistence ---
 function saveSession() {
-  if (!roomId || !questions.length) return;
-  const data = {
-    roomId, role, myName, peerName, questions,
-    myAnswers, peerAnswers, currentQ,
-    isAdmin, hostHasAdmin,
-    chatMessages, myReady, peerReady,
-    ts: Date.now()
-  };
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+  if (!roomId) return;
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      roomId, role, myName, peerName, questions1, questions2,
+      isAdmin, hostHasAdmin, rounds, currentRound, whoseTurn,
+      phase, usedQuestions, ts: Date.now()
+    }));
+  } catch {}
 }
 
 function loadSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (Date.now() - data.ts > 24 * 60 * 60 * 1000) {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    }
-    return data;
+    const d = JSON.parse(raw);
+    if (Date.now() - d.ts > 24 * 60 * 60 * 1000) { localStorage.removeItem(SESSION_KEY); return null; }
+    return d;
   } catch { return null; }
 }
 
@@ -588,122 +585,87 @@ function clearSavedSession() {
   localStorage.removeItem(SESSION_KEY);
   $('resumePhase').classList.add('hidden');
   $('setupPhase').classList.remove('hidden');
-  const urlRoom = getRoomFromURL();
-  if (urlRoom) {
+  if (getRoomFromURL()) {
     $('setupPhase').classList.add('hidden');
     $('joinPhase').classList.remove('hidden');
   }
 }
 
 async function resumeSession() {
-  const data = loadSession();
-  if (!data) { clearSavedSession(); return; }
-
-  role = data.role;
-  myName = data.myName;
-  peerName = data.peerName;
-  questions = data.questions;
-  myAnswers = data.myAnswers || {};
-  peerAnswers = data.peerAnswers || {};
-  currentQ = data.currentQ || 0;
-  isAdmin = data.isAdmin || false;
-  hostHasAdmin = data.hostHasAdmin || false;
-  chatMessages = data.chatMessages || {};
-  myReady = data.myReady || {};
-  peerReady = data.peerReady || {};
-  roomId = data.roomId;
+  const d = loadSession();
+  if (!d) { clearSavedSession(); return; }
+  role = d.role; myName = d.myName; peerName = d.peerName;
+  questions1 = d.questions1; questions2 = d.questions2;
+  isAdmin = d.isAdmin; hostHasAdmin = d.hostHasAdmin;
+  rounds = d.rounds || []; currentRound = d.currentRound;
+  whoseTurn = d.whoseTurn; phase = d.phase;
+  usedQuestions = d.usedQuestions || { 0: [], 1: [] };
+  roomId = d.roomId;
 
   $('resumePhase').classList.add('hidden');
-
-  const passEl = role === 'host' ? $('passphrase') : $('guestPassphrase');
-  const passPrompt = prompt('Enter your passphrase to rejoin:');
-  if (!passPrompt) { clearSavedSession(); return; }
-
-  cryptoKey = await deriveKey(passPrompt);
+  const pass = prompt('Enter your passphrase to rejoin:');
+  if (!pass) { clearSavedSession(); return; }
+  cryptoKey = await deriveKey(pass);
   setStatus('connecting', 'Reconnecting...');
-
   try {
     await connectMQTT();
     if (role === 'host') {
-      await publish('room', { type: 'room', questions, hostName: myName, adminEnabled: isAdmin });
+      await publish('room', { type: 'room', questions1, questions2, hostName: myName, adminEnabled: isAdmin });
     }
-    publish('sync', { type: 'sync', from: myName, role, myAnswers, currentQ });
-
-    connected = true;
-    wasConnected = true;
-    setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected, waiting for peer...');
+    publish('sync', { type: 'sync', from: myName, role, rounds, currentRound, whoseTurn, phase, usedQuestions });
+    connected = true; wasConnected = true;
+    setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected');
     $('e2eTag').style.display = '';
     if (isAdmin) $('adminBadge').classList.remove('hidden');
-
-    $('setupPhase').classList.add('hidden');
-    $('joinPhase').classList.add('hidden');
-    $('questionPhase').classList.remove('hidden');
-    renderQuestion();
+    enterGame();
   } catch (err) {
-    showError('errorArea', 'Failed to reconnect: ' + err.message);
+    showError('errorArea', 'Failed: ' + err.message);
     clearSavedSession();
     $('setupPhase').classList.remove('hidden');
   }
 }
 
+// --- Helpers ---
 function generateRoomCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  const arr = crypto.getRandomValues(new Uint8Array(6));
-  for (let i = 0; i < 6; i++) code += chars[arr[i] % chars.length];
-  return code;
+  let c = ''; const a = crypto.getRandomValues(new Uint8Array(6));
+  for (let i = 0; i < 6; i++) c += chars[a[i] % chars.length];
+  return c;
+}
+function getRoomFromURL() { return new URLSearchParams(window.location.search).get('room'); }
+function toggleVis(iid, bid) { const i=$(iid),b=$(bid); i.type=i.type==='password'?'text':'password'; b.textContent=i.type==='password'?'Show':'Hide'; }
+function toggleAdmin() { isAdmin=!isAdmin; $('adminToggle').classList.toggle('active',isAdmin); }
+function flashField(id) { const e=$(id); e.focus(); e.style.borderColor='var(--red)'; setTimeout(()=>e.style.borderColor='',1500); }
+function escHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function isMyTurn() {
+  return (whoseTurn === 'host' && role === 'host') || (whoseTurn === 'guest' && role === 'guest');
 }
 
-function getRoomFromURL() {
-  return new URLSearchParams(window.location.search).get('room');
-}
-
-function toggleVis(inputId, btnId) {
-  const inp = $(inputId);
-  const btn = $(btnId);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
-}
-
-function toggleAdmin() {
-  isAdmin = !isAdmin;
-  $('adminToggle').classList.toggle('active', isAdmin);
-}
-
-function flashField(id) {
-  const el = $(id);
-  el.focus();
-  el.style.borderColor = 'var(--red)';
-  setTimeout(() => el.style.borderColor = '', 1500);
-}
+function totalQuestions() { return questions1.length + questions2.length; }
+function allUsed() { return usedQuestions[0].length + usedQuestions[1].length >= totalQuestions(); }
 
 // --- File handling ---
-const fileDrop = $('fileDrop');
-const fileInput = $('fileInput');
+function setupFileDrop(dropId, inputId, labelId, target) {
+  const drop = $(dropId), inp = $(inputId);
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); if(e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0], labelId, target); });
+  inp.addEventListener('change', e => { if(e.target.files.length) loadFile(e.target.files[0], labelId, target); });
+}
 
-fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
-fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
-fileDrop.addEventListener('drop', e => {
-  e.preventDefault(); fileDrop.classList.remove('dragover');
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', e => {
-  if (e.target.files.length) handleFile(e.target.files[0]);
-});
-
-function handleFile(file) {
+function loadFile(file, labelId, target) {
   const reader = new FileReader();
   reader.onload = e => {
-    questions = parseQuestions(e.target.result);
-    if (questions.length === 0) {
-      $('fileInfo').textContent = 'No questions found. Use numbered lines like "1. Question text"';
-      $('fileInfo').style.color = 'var(--red)';
-    } else {
-      $('fileInfo').textContent = `${questions.length} question${questions.length > 1 ? 's' : ''} loaded from "${file.name}"`;
-      $('fileInfo').style.color = 'var(--green)';
+    const qs = parseQuestions(e.target.result);
+    if (target === 0) questions1 = qs; else questions2 = qs;
+    $(labelId).textContent = qs.length ? `${qs.length} Q loaded` : 'No questions';
+    $(labelId).style.color = qs.length ? 'var(--green)' : 'var(--red)';
+    $('createBtn').disabled = !(questions1.length && questions2.length);
+    if (questions1.length && questions2.length) {
+      $('fileInfo').textContent = `Set A: ${questions1.length} questions, Set B: ${questions2.length} questions`;
+      $('filePreview').classList.remove('hidden');
     }
-    $('filePreview').classList.remove('hidden');
-    $('createBtn').disabled = questions.length === 0;
   };
   reader.readAsText(file);
 }
@@ -714,356 +676,333 @@ function parseQuestions(text) {
     .filter(Boolean);
 }
 
+setupFileDrop('fileDrop1', 'fileInput1', 'fileLabel1', 0);
+setupFileDrop('fileDrop2', 'fileInput2', 'fileLabel2', 1);
+
 // --- Crypto ---
-async function deriveKey(passphrase) {
-  const enc = new TextEncoder();
-  const km = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: enc.encode('secure-questionnaire-v2'), iterations: 100000, hash: 'SHA-256' },
-    km, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
+async function deriveKey(p) {
+  const e=new TextEncoder(), k=await crypto.subtle.importKey('raw',e.encode(p),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:e.encode('secure-questionnaire-v2'),iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-
 async function encrypt(text) {
-  const enc = new TextEncoder();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, enc.encode(text));
-  const buf = new Uint8Array(iv.length + ct.byteLength);
-  buf.set(iv);
-  buf.set(new Uint8Array(ct), iv.length);
-  return btoa(String.fromCharCode(...buf));
+  const e=new TextEncoder(),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,e.encode(text));
+  const b=new Uint8Array(iv.length+ct.byteLength); b.set(iv); b.set(new Uint8Array(ct),iv.length);
+  return btoa(String.fromCharCode(...b));
 }
-
 async function decrypt(b64) {
-  const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  const iv = raw.slice(0, 12);
-  const ct = raw.slice(12);
-  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ct);
-  return new TextDecoder().decode(pt);
+  const r=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),iv=r.slice(0,12),ct=r.slice(12);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv},cryptoKey,ct));
 }
 
 // --- MQTT ---
-function topic(suffix) {
-  return `sq/${roomId}/${suffix}`;
-}
+function topic(s) { return `sq/${roomId}/${s}`; }
 
 function connectMQTT() {
   return new Promise((resolve, reject) => {
-    const clientId = 'sq_' + Math.random().toString(36).slice(2, 10);
-    client = mqtt.connect(BROKER_URL, {
-      clientId,
-      clean: true,
-      connectTimeout: 10000,
-      reconnectPeriod: 3000,
-    });
-
+    const cid = 'sq_' + Math.random().toString(36).slice(2,10);
+    client = mqtt.connect(BROKER_URL, { clientId:cid, clean:true, connectTimeout:10000, reconnectPeriod:3000 });
     let resolved = false;
-
     client.on('connect', () => {
-      client.subscribe(topic('+'), { qos: 1 }, err => {
-        if (!resolved) {
-          resolved = true;
-          if (err) { reject(err); return; }
-          mqttReady = true;
-          resolve();
-        }
+      client.subscribe(topic('+'), { qos:1 }, err => {
+        if (!resolved) { resolved=true; if(err){reject(err);return;} mqttReady=true; resolve(); }
         if (wasConnected) {
           $('reconnectBanner').classList.remove('show');
           setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected');
-          publish('sync', { type: 'sync', from: myName, role, myAnswers, currentQ });
-          if (role === 'host') {
-            publish('room', { type: 'room', questions, hostName: myName, adminEnabled: isAdmin });
-          }
+          publish('sync', { type:'sync', from:myName, role, rounds, currentRound, whoseTurn, phase, usedQuestions });
+          if (role==='host') publish('room', { type:'room', questions1, questions2, hostName:myName, adminEnabled:isAdmin });
         }
       });
     });
-
-    client.on('error', err => {
-      if (!resolved) { resolved = true; reject(err); }
+    client.on('error', err => { if(!resolved){resolved=true;reject(err);} });
+    client.on('message', async (t, msg) => {
+      const s=t.replace(`sq/${roomId}/`,''); let m;
+      try { m=JSON.parse(await decrypt(msg.toString())); } catch { return; }
+      handleMessage(s, m);
     });
-
-    client.on('message', async (t, message) => {
-      const suffix = t.replace(`sq/${roomId}/`, '');
-      let msg;
-      try {
-        msg = JSON.parse(await decrypt(message.toString()));
-      } catch {
-        return;
-      }
-      handleMessage(suffix, msg);
-    });
-
-    client.on('offline', () => {
-      if (wasConnected) {
-        $('reconnectBanner').classList.add('show');
-        setStatus('connecting', 'Reconnecting...');
-      }
-    });
-
-    client.on('reconnect', () => {
-      if (wasConnected) {
-        setStatus('connecting', 'Reconnecting...');
-      }
-    });
+    client.on('offline', () => { if(wasConnected){$('reconnectBanner').classList.add('show');setStatus('connecting','Reconnecting...');} });
+    client.on('reconnect', () => { if(wasConnected) setStatus('connecting','Reconnecting...'); });
   });
 }
 
-async function publish(suffix, obj) {
-  if (!client || !client.connected) return;
-  const encrypted = await encrypt(JSON.stringify(obj));
-  client.publish(topic(suffix), encrypted, { qos: 1, retain: suffix === 'room' });
+async function publish(s, o) {
+  if (!client||!client.connected) return;
+  client.publish(topic(s), await encrypt(JSON.stringify(o)), { qos:1, retain:s==='room' });
 }
 
 function handleMessage(suffix, msg) {
   if (suffix === 'room' && role === 'guest' && !connected) {
-    questions = msg.questions;
-    peerName = msg.hostName;
-    hostHasAdmin = msg.adminEnabled || false;
-    connected = true;
-    wasConnected = true;
+    questions1 = msg.questions1; questions2 = msg.questions2;
+    peerName = msg.hostName; hostHasAdmin = msg.adminEnabled || false;
+    connected = true; wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
-    publish('join', { type: 'join', name: myName });
-    startQuestionnaire();
-    saveSession();
+    publish('join', { type:'join', name:myName });
+    enterGame(); saveSession();
   }
 
   if (suffix === 'join' && role === 'host') {
-    peerName = msg.name;
-    connected = true;
-    wasConnected = true;
+    peerName = msg.name; connected = true; wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
     $('e2eTag').style.display = '';
-    startQuestionnaire();
-    saveSession();
+    enterGame(); saveSession();
   }
 
-  if (suffix === 'answers') {
-    if (msg.from !== myName) {
-      peerAnswers[msg.index] = msg.answer;
-      delete peerPeek[msg.index];
+  if (suffix === 'pick' && msg.from !== myName) {
+    const r = { set: msg.set, index: msg.index, pickerRole: msg.pickerRole,
+      questionText: msg.questionText, answers: {}, chat: [], ready: { host:false, guest:false } };
+    rounds.push(r);
+    currentRound = rounds.length - 1;
+    usedQuestions[msg.set].push(msg.index);
+    phase = 'answering';
+    whoseTurn = msg.nextTurn;
+    saveSession(); renderGame();
+  }
+
+  if (suffix === 'answer' && msg.from !== myName) {
+    if (currentRound >= 0 && rounds[currentRound]) {
+      rounds[currentRound].answers[msg.role] = msg.answer;
+      delete peerPeek[currentRound];
+      const r = rounds[currentRound];
+      if (r.answers.host && r.answers.guest) { phase = 'chatting'; }
+      saveSession(); renderGame();
+    }
+  }
+
+  if (suffix === 'peek' && isAdmin && msg.from !== myName) {
+    peerPeek[msg.round] = { rating: msg.rating, text: msg.text || '' };
+    renderGame();
+  }
+
+  if (suffix === 'chat' && msg.round !== undefined) {
+    if (rounds[msg.round]) {
+      rounds[msg.round].chat.push({ from:msg.from, text:msg.text, time:msg.time, isMine:msg.from===myName });
       saveSession();
-      if (currentQ >= questions.length) {
-        showResults();
+      if (msg.round === currentRound) appendChatBubble(msg.round, rounds[msg.round].chat.length - 1);
+    }
+  }
+
+  if (suffix === 'ready' && msg.from !== myName) {
+    if (rounds[msg.round]) {
+      rounds[msg.round].ready[msg.role] = true;
+      saveSession();
+      const rd = rounds[msg.round];
+      if (rd.ready.host && rd.ready.guest) {
+        phase = 'picking'; currentRound = -1;
+        if (allUsed()) { showResults(); } else { renderGame(); }
       } else {
-        renderQuestion();
+        renderGame();
       }
     }
   }
 
-  if (suffix === 'peek' && isAdmin) {
-    if (msg.from !== myName) {
-      peerPeek[msg.index] = { rating: msg.rating, text: msg.text || '' };
-      updatePeekDisplay(msg.index);
+  if (suffix === 'sync' && msg.from !== myName) {
+    if (!peerName) peerName = msg.from;
+    if (msg.rounds && msg.rounds.length > rounds.length) {
+      rounds = msg.rounds; currentRound = msg.currentRound;
+      whoseTurn = msg.whoseTurn; phase = msg.phase;
+      usedQuestions = msg.usedQuestions || usedQuestions;
     }
-  }
-
-  if (suffix === 'chat') {
-    if (!chatMessages[msg.index]) chatMessages[msg.index] = [];
-    chatMessages[msg.index].push({ from: msg.from, text: msg.text, time: msg.time, isMine: msg.from === myName });
     saveSession();
-    if (msg.index === currentQ) appendChatBubble(msg.index, chatMessages[msg.index].length - 1);
-  }
-
-  if (suffix === 'ready') {
-    if (msg.from !== myName) {
-      peerReady[msg.index] = true;
-      saveSession();
-      if (myReady[msg.index] && !isAdmin) {
-        advanceQuestion();
-      } else {
-        updateReadyBar(msg.index);
-      }
-    }
-  }
-
-  if (suffix === 'navigate') {
-    if (msg.from !== myName) {
-      currentQ = msg.goTo;
-      saveSession();
-      $('questionPhase').classList.remove('hidden');
-      $('resultsPhase').classList.add('hidden');
-      renderQuestion();
-    }
-  }
-
-  if (suffix === 'sync') {
-    if (msg.from !== myName) {
-      if (!peerName) peerName = msg.from;
-      if (msg.myAnswers) {
-        for (const [k, v] of Object.entries(msg.myAnswers)) {
-          peerAnswers[k] = v;
-        }
-      }
-      saveSession();
-      if (connected) renderQuestion();
-    }
+    if (connected) renderGame();
   }
 }
 
 // --- Host ---
 async function createRoom() {
-  if (!questions.length) return;
+  if (!questions1.length || !questions2.length) return;
   if (!$('userName').value.trim()) { flashField('userName'); return; }
   if (!$('passphrase').value.trim()) { flashField('passphrase'); return; }
-
-  role = 'host';
-  myName = $('userName').value.trim();
+  role = 'host'; myName = $('userName').value.trim();
   cryptoKey = await deriveKey($('passphrase').value);
   roomId = generateRoomCode();
-
-  $('createBtn').disabled = true;
-  $('createBtn').textContent = 'Creating...';
+  $('createBtn').disabled = true; $('createBtn').textContent = 'Creating...';
   setStatus('connecting', 'Connecting...');
-
   try {
     await connectMQTT();
-    await publish('room', { type: 'room', questions, hostName: myName, adminEnabled: isAdmin });
-
+    await publish('room', { type:'room', questions1, questions2, hostName:myName, adminEnabled:isAdmin });
     $('uploadCard').classList.add('hidden');
     $('shareCard').classList.remove('hidden');
-    const link = window.location.origin + window.location.pathname + '?room=' + roomId;
-    $('shareLink').value = link;
+    $('shareLink').value = window.location.origin + window.location.pathname + '?room=' + roomId;
     $('roomCodeDisplay').textContent = roomId;
     setStatus('connecting', 'Room created. Waiting for peer...');
-    wasConnected = true;
-    saveSession();
+    wasConnected = true; saveSession();
   } catch (err) {
-    $('createBtn').disabled = false;
-    $('createBtn').textContent = 'Create Room & Get Link';
-    showError('errorArea', 'Failed to connect: ' + err.message);
-    setStatus('disconnected', 'Connection failed');
+    $('createBtn').disabled = false; $('createBtn').textContent = 'Create Room & Get Link';
+    showError('errorArea', 'Failed: ' + err.message); setStatus('disconnected', 'Failed');
   }
 }
 
 function copyLink() {
   navigator.clipboard.writeText($('shareLink').value);
-  const fb = $('copyLinkFb');
-  fb.classList.add('show');
-  setTimeout(() => fb.classList.remove('show'), 2000);
+  $('copyLinkFb').classList.add('show'); setTimeout(()=>$('copyLinkFb').classList.remove('show'),2000);
 }
 
 // --- Guest ---
 async function joinRoom() {
   if (!$('guestName').value.trim()) { flashField('guestName'); return; }
   if (!$('guestPassphrase').value.trim()) { flashField('guestPassphrase'); return; }
-
-  role = 'guest';
-  myName = $('guestName').value.trim();
+  role = 'guest'; myName = $('guestName').value.trim();
   cryptoKey = await deriveKey($('guestPassphrase').value);
-
-  $('joinBtn').disabled = true;
-  $('joinBtn').textContent = 'Connecting...';
-  setStatus('connecting', 'Connecting to room...');
-
+  $('joinBtn').disabled = true; $('joinBtn').textContent = 'Connecting...';
+  setStatus('connecting', 'Connecting...');
   try {
     await connectMQTT();
-    setStatus('connecting', 'Connected to relay, waiting for room data...');
-
+    setStatus('connecting', 'Waiting for room data...');
     setTimeout(() => {
       if (!connected) {
-        showError('joinError', 'Room data not received. Make sure the host has the room open and you have the correct passphrase.');
-        $('joinBtn').disabled = false;
-        $('joinBtn').textContent = 'Join Session';
+        showError('joinError', 'Room data not received. Check passphrase.');
+        $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
       }
     }, 15000);
   } catch (err) {
-    $('joinBtn').disabled = false;
-    $('joinBtn').textContent = 'Join Session';
-    showError('joinError', 'Failed to connect: ' + err.message);
-    setStatus('disconnected', 'Connection failed');
+    $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
+    showError('joinError', 'Failed: ' + err.message);
   }
 }
 
-// --- UI Helpers ---
-function setStatus(state, text) {
-  const dot = $('statusDot');
-  dot.className = 'status-dot';
-  if (state === 'connected') dot.classList.add('connected');
-  else if (state === 'connecting') dot.classList.add('connecting');
-  $('statusText').textContent = text;
+// --- UI ---
+function setStatus(s, t) {
+  $('statusDot').className = 'status-dot' + (s==='connected'?' connected':s==='connecting'?' connecting':'');
+  $('statusText').textContent = t;
 }
+function showError(id, m) { const a=$(id); if(a) a.innerHTML=`<div class="error-box">${escHtml(m)}</div>`; }
 
-function showError(areaId, msg) {
-  const area = $(areaId);
-  if (area) area.innerHTML = `<div class="error-box">${escHtml(msg)}</div>`;
-}
-
-// --- Questionnaire ---
-function startQuestionnaire() {
+function enterGame() {
   $('setupPhase').classList.add('hidden');
   $('joinPhase').classList.add('hidden');
-  $('questionPhase').classList.remove('hidden');
+  $('gamePhase').classList.remove('hidden');
   if (isAdmin) $('adminBadge').classList.remove('hidden');
-  currentQ = 0;
-  renderQuestion();
+  renderGame();
 }
 
-function renderQuestion() {
-  const area = $('questionArea');
+function renderGame() {
+  const area = $('gameArea');
   area.innerHTML = '';
 
-  if (currentQ >= questions.length && !isAdmin) {
-    showResults();
-    return;
+  if (allUsed() && phase === 'picking') { showResults(); return; }
+
+  // Round counter
+  const counter = document.createElement('div');
+  counter.className = 'round-counter';
+  counter.textContent = `Round ${rounds.length + (phase==='picking'?1:0)} of ${totalQuestions()} · ${usedQuestions[0].length + usedQuestions[1].length} questions asked`;
+  area.appendChild(counter);
+
+  if (phase === 'picking') {
+    renderPickingPhase(area);
+  } else if (phase === 'answering') {
+    renderAnsweringPhase(area);
+  } else if (phase === 'chatting') {
+    renderChattingPhase(area);
   }
+}
 
-  if (currentQ >= questions.length && isAdmin) {
-    currentQ = questions.length - 1;
+function renderPickingPhase(area) {
+  const banner = document.createElement('div');
+  if (isMyTurn()) {
+    banner.className = 'turn-banner your-turn';
+    banner.textContent = 'Your turn — pick a question to ask ' + (peerName || 'the other player');
+  } else {
+    banner.className = 'turn-banner their-turn';
+    banner.textContent = (peerName || 'Other player') + ' is choosing a question...';
   }
+  area.appendChild(banner);
 
-  const pct = ((Object.keys(myAnswers).length) / questions.length) * 100;
-  $('progressFill').style.width = pct + '%';
+  [0, 1].forEach(setIdx => {
+    const qs = setIdx === 0 ? questions1 : questions2;
+    const setDiv = document.createElement('div');
+    setDiv.className = 'q-set';
+    const title = document.createElement('div');
+    title.className = 'q-set-title ' + (setIdx === 0 ? 'set-a' : 'set-b');
+    title.innerHTML = `${setIdx === 0 ? '&#128309;' : '&#128995;'} Set ${setIdx === 0 ? 'A' : 'B'} — ${qs.length} questions`;
+    setDiv.appendChild(title);
 
-  if (isAdmin) {
-    area.appendChild(buildQuestionPicker());
-  }
+    const list = document.createElement('div');
+    list.className = 'q-list';
 
-  const i = currentQ;
-  const myAns = myAnswers[i];
-  const peerAns = peerAnswers[i];
-  const bothAnswered = myAns !== undefined && peerAns !== undefined;
+    qs.forEach((q, qi) => {
+      const used = usedQuestions[setIdx].includes(qi);
+      const item = document.createElement('div');
+      item.className = 'q-item' + (used ? ' used disabled' : '') + (!isMyTurn() ? ' disabled' : '');
+      item.innerHTML = `
+        <div class="q-num">${used ? '&#10003;' : qi + 1}</div>
+        <div class="q-label">${escHtml(q)}</div>
+        ${used ? '<div class="q-done">Done</div>' : ''}
+      `;
+      if (!used && isMyTurn()) {
+        item.onclick = () => pickQuestion(setIdx, qi);
+      }
+      list.appendChild(item);
+    });
+
+    setDiv.appendChild(list);
+    area.appendChild(setDiv);
+  });
+}
+
+function pickQuestion(setIdx, qIdx) {
+  const qs = setIdx === 0 ? questions1 : questions2;
+  const r = {
+    set: setIdx, index: qIdx, pickerRole: role,
+    questionText: qs[qIdx],
+    answers: {}, chat: [], ready: { host: false, guest: false }
+  };
+  rounds.push(r);
+  currentRound = rounds.length - 1;
+  usedQuestions[setIdx].push(qIdx);
+  phase = 'answering';
+
+  const nextTurn = whoseTurn === 'host' ? 'guest' : 'host';
+  publish('pick', { type:'pick', set:setIdx, index:qIdx, pickerRole:role, questionText:qs[qIdx], from:myName, nextTurn });
+  whoseTurn = nextTurn;
+  saveSession();
+  renderGame();
+}
+
+function renderAnsweringPhase(area) {
+  const r = rounds[currentRound];
+  if (!r) return;
+  const myAns = r.answers[role];
+  const peerRole = role === 'host' ? 'guest' : 'host';
+  const peerAns = r.answers[peerRole];
 
   const div = document.createElement('div');
   div.className = 'question-card';
 
+  const pickerName = r.pickerRole === role ? 'You' : escHtml(peerName);
   div.innerHTML = `
-    <div class="question-num">Question ${i + 1} of ${questions.length}</div>
-    <div class="question-text">${escHtml(questions[i])}</div>
+    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
+    <div class="question-text">${escHtml(r.questionText)}</div>
   `;
 
   if (myAns === undefined) {
     selectedRating = null;
     const bar = document.createElement('div');
     bar.className = 'rating-bar';
-    bar.id = 'ratingBar_' + i;
 
-    RATINGS.forEach(r => {
+    RATINGS.forEach(rt => {
       const rb = document.createElement('button');
-      rb.className = `rating-btn r${r.value}`;
-      rb.innerHTML = `<span class="rating-emoji">${r.emoji}</span><span>${r.label}</span>`;
+      rb.className = `rating-btn r${rt.value}`;
+      rb.innerHTML = `<span class="rating-emoji">${rt.emoji}</span><span>${rt.label}</span>`;
       rb.onclick = () => {
-        selectedRating = r.value;
+        selectedRating = rt.value;
         bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
         rb.classList.add('selected');
         if (role === 'guest' && hostHasAdmin) {
-          publish('peek', { type: 'peek', index: i, rating: r.value, text: '', from: myName });
+          publish('peek', { type:'peek', round:currentRound, rating:rt.value, text:'', from:myName });
         }
       };
       bar.appendChild(rb);
     });
-
     div.appendChild(bar);
 
     const ta = document.createElement('textarea');
-    ta.id = 'ansText_' + i;
+    ta.id = 'ansText';
     ta.placeholder = 'Add a note (optional)...';
     ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
     if (role === 'guest' && hostHasAdmin) {
       ta.oninput = () => {
-        if (selectedRating !== null) {
-          publish('peek', { type: 'peek', index: i, rating: selectedRating, text: ta.value, from: myName });
-        }
+        if (selectedRating !== null) publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
       };
     }
     div.appendChild(ta);
@@ -1071,188 +1010,141 @@ function renderQuestion() {
     const btn = document.createElement('button');
     btn.textContent = 'Submit';
     btn.style.cssText = 'margin-top:10px;width:100%';
-    btn.onclick = () => submitAnswer(i);
+    btn.onclick = () => submitAnswer();
     div.appendChild(btn);
 
-    if (isAdmin && peerAns !== undefined) {
-      const peerDiv = document.createElement('div');
-      peerDiv.className = 'answer-display peer';
-      peerDiv.style.marginTop = '12px';
-      peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
-      div.appendChild(peerDiv);
+    if (isAdmin && peerAns) {
+      const pd = document.createElement('div');
+      pd.className = 'answer-display peer';
+      pd.style.marginTop = '12px';
+      pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
+      div.appendChild(pd);
+    } else if (isAdmin && peerPeek[currentRound]) {
+      const pd = document.createElement('div');
+      pd.className = 'answer-display peer';
+      pd.style.marginTop = '12px';
+      pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[currentRound])}`;
+      div.appendChild(pd);
     }
   } else {
-    if (!bothAnswered) {
-      const myDiv = document.createElement('div');
-      myDiv.className = 'answer-display you';
-      myDiv.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
-      div.appendChild(myDiv);
+    const md = document.createElement('div');
+    md.className = 'answer-display you';
+    md.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
+    div.appendChild(md);
 
-      if (isAdmin) {
-        if (peerPeek[i] !== undefined) {
-          const peerDiv = document.createElement('div');
-          peerDiv.className = 'answer-display peer';
-          peerDiv.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[i])}`;
-          div.appendChild(peerDiv);
-        } else {
-          const badge = document.createElement('div');
-          badge.className = 'waiting-badge';
-          badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
-          div.appendChild(badge);
-        }
-      } else {
-        const badge = document.createElement('div');
-        badge.className = 'waiting-badge';
-        badge.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName || 'peer')} to answer...`;
-        div.appendChild(badge);
-      }
+    if (peerAns) {
+      phase = 'chatting'; saveSession();
+      div.appendChild(buildChat(currentRound, myAns, peerAns));
     } else {
-      div.appendChild(buildChat(i, myAns, peerAns));
+      if (isAdmin && peerPeek[currentRound]) {
+        const pd = document.createElement('div');
+        pd.className = 'answer-display peer';
+        pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[currentRound])}`;
+        div.appendChild(pd);
+      } else {
+        const b = document.createElement('div');
+        b.className = 'waiting-badge';
+        b.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName||'peer')}...`;
+        div.appendChild(b);
+      }
     }
   }
 
   area.appendChild(div);
-
-  if (isAdmin && peerPeek[i] !== undefined && myAnswers[i] === undefined) {
-    updatePeekDisplay(i);
-  }
 }
 
-function buildQuestionPicker() {
-  const picker = document.createElement('div');
-  picker.className = 'q-picker';
-  picker.innerHTML = `<div class="q-picker-label">Admin — Choose Question</div>`;
-  const grid = document.createElement('div');
-  grid.className = 'q-picker-grid';
+function renderChattingPhase(area) {
+  const r = rounds[currentRound];
+  if (!r) return;
+  const myAns = r.answers[role];
+  const peerRole = role === 'host' ? 'guest' : 'host';
+  const peerAns = r.answers[peerRole];
 
-  for (let i = 0; i < questions.length; i++) {
-    const btn = document.createElement('button');
-    btn.className = 'q-picker-btn';
-    btn.textContent = i + 1;
-    if (i === currentQ) btn.classList.add('current');
-    if (myAnswers[i] !== undefined && peerAnswers[i] !== undefined) {
-      btn.classList.add('both-answered');
-    } else if (myAnswers[i] !== undefined) {
-      btn.classList.add('answered');
-    }
-    btn.onclick = () => {
-      currentQ = i;
-      publish('navigate', { type: 'navigate', goTo: i, from: myName });
-      saveSession();
-      renderQuestion();
-    };
-    grid.appendChild(btn);
-  }
-
-  picker.appendChild(grid);
-
-  const allDone = questions.every((_, i) => myAnswers[i] !== undefined && peerAnswers[i] !== undefined);
-  if (allDone) {
-    const resultsBtn = document.createElement('button');
-    resultsBtn.textContent = 'See All Results';
-    resultsBtn.style.cssText = 'margin-top:10px;width:100%';
-    resultsBtn.onclick = () => showResults();
-    picker.appendChild(resultsBtn);
-  }
-
-  return picker;
+  const div = document.createElement('div');
+  div.className = 'question-card';
+  const pickerName = r.pickerRole === role ? 'You' : escHtml(peerName);
+  div.innerHTML = `
+    <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
+    <div class="question-text">${escHtml(r.questionText)}</div>
+  `;
+  div.appendChild(buildChat(currentRound, myAns, peerAns));
+  area.appendChild(div);
 }
 
-function updatePeekDisplay(index) {
-  if (index !== currentQ) return;
-  const existing = document.getElementById('peekDisplay');
-  const pk = peerPeek[index];
-  if (pk === undefined) { if (existing) existing.remove(); return; }
-  const html = `<div class="peek-label">${escHtml(peerName)}'s current selection <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(pk)}`;
-  if (existing) {
-    existing.innerHTML = html;
-  } else {
-    const el = document.createElement('div');
-    el.className = 'peek-box';
-    el.id = 'peekDisplay';
-    el.innerHTML = html;
-    const card = document.querySelector('.question-card');
-    if (card) card.appendChild(el);
-  }
-}
-
-function submitAnswer(index) {
+function submitAnswer() {
   if (selectedRating === null) return;
-  const text = (document.getElementById('ansText_' + index) || {}).value || '';
+  const text = ($('ansText') || {}).value || '';
   const ans = { rating: selectedRating, text: text.trim() };
-  myAnswers[index] = ans;
-  publish('answers', { type: 'answer', index, answer: ans, from: myName });
+  rounds[currentRound].answers[role] = ans;
+  publish('answer', { type:'answer', round:currentRound, role, answer:ans, from:myName });
   selectedRating = null;
   saveSession();
-  renderQuestion();
+  renderGame();
 }
 
-function ratingHtml(value) {
-  const v = (typeof value === 'object') ? value.rating : value;
-  const r = RATINGS.find(r => r.value === v);
-  if (!r) return escHtml(String(v));
+function ratingHtml(v) {
+  const val = (typeof v === 'object') ? v.rating : v;
+  const r = RATINGS.find(x => x.value === val);
+  if (!r) return escHtml(String(val));
   return `<div class="rating-display"><span class="rating-emoji">${r.emoji}</span> ${escHtml(r.label)}</div>`;
 }
 
-function answerHtml(ans) {
-  if (!ans) return '';
-  const a = (typeof ans === 'object') ? ans : { rating: ans, text: '' };
-  let html = ratingHtml(a.rating);
-  if (a.text) html += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(a.text)}"</div>`;
-  return html;
+function answerHtml(a) {
+  if (!a) return '';
+  const o = (typeof a === 'object') ? a : { rating: a, text: '' };
+  let h = ratingHtml(o.rating);
+  if (o.text) h += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(o.text)}"</div>`;
+  return h;
 }
 
-function peekHtml(peek) {
-  if (!peek) return '';
-  let html = ratingHtml(peek.rating);
-  if (peek.text) html += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(peek.text)}"</div>`;
-  return html;
+function peekHtml(p) {
+  if (!p) return '';
+  let h = ratingHtml(p.rating);
+  if (p.text) h += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(p.text)}"</div>`;
+  return h;
 }
 
-function buildChat(index, myAns, peerAns) {
+function buildChat(roundIdx, myAns, peerAns) {
+  const r = rounds[roundIdx];
   const wrap = document.createElement('div');
   wrap.className = 'chat-container';
-  wrap.id = 'chatContainer_' + index;
+  wrap.id = 'chatWrap_' + roundIdx;
 
-  const header = document.createElement('div');
-  header.className = 'chat-header';
-  header.innerHTML = `Question ${index + 1} — Discussion`;
-  wrap.appendChild(header);
+  const hdr = document.createElement('div');
+  hdr.className = 'chat-header';
+  hdr.textContent = 'Discussion';
+  wrap.appendChild(hdr);
 
-  if (!isAdmin) {
-    const readyBar = document.createElement('div');
-    readyBar.className = 'ready-bar';
-    readyBar.id = 'readyBar_' + index;
-    buildReadyBarContent(readyBar, index);
-    wrap.appendChild(readyBar);
-  }
+  // Ready bar
+  const rbar = document.createElement('div');
+  rbar.className = 'ready-bar';
+  rbar.id = 'readyBar_' + roundIdx;
+  buildReadyBar(rbar, roundIdx);
+  wrap.appendChild(rbar);
 
+  // Messages
   const msgs = document.createElement('div');
   msgs.className = 'chat-messages';
-  msgs.id = 'chatMessages_' + index;
+  msgs.id = 'chatMsgs_' + roundIdx;
 
-  const myR = RATINGS.find(r => r.value === (typeof myAns === 'object' ? myAns.rating : myAns));
-  const peerR = RATINGS.find(r => r.value === (typeof peerAns === 'object' ? peerAns.rating : peerAns));
+  const myR = RATINGS.find(x => x.value === (typeof myAns==='object'?myAns.rating:myAns));
+  const peerR = RATINGS.find(x => x.value === (typeof peerAns==='object'?peerAns.rating:peerAns));
 
-  const myBubble = document.createElement('div');
-  myBubble.className = 'chat-bubble mine';
-  let myContent = `<div class="bubble-name">You</div><div class="answer-tag">${myR ? myR.emoji : ''} ${myR ? escHtml(myR.label) : ''}</div>`;
-  if (typeof myAns === 'object' && myAns.text) myContent += `<div style="margin-top:6px">${escHtml(myAns.text)}</div>`;
-  myBubble.innerHTML = myContent;
-  msgs.appendChild(myBubble);
+  const mb = document.createElement('div'); mb.className = 'chat-bubble mine';
+  let mc = `<div class="bubble-name">You</div><div class="answer-tag">${myR?myR.emoji:''} ${myR?escHtml(myR.label):''}</div>`;
+  if (typeof myAns==='object'&&myAns.text) mc += `<div style="margin-top:6px">${escHtml(myAns.text)}</div>`;
+  mb.innerHTML = mc; msgs.appendChild(mb);
 
-  const peerBubble = document.createElement('div');
-  peerBubble.className = 'chat-bubble peer';
-  let peerContent = `<div class="bubble-name">${escHtml(peerName)}</div><div class="answer-tag">${peerR ? peerR.emoji : ''} ${peerR ? escHtml(peerR.label) : ''}</div>`;
-  if (typeof peerAns === 'object' && peerAns.text) peerContent += `<div style="margin-top:6px">${escHtml(peerAns.text)}</div>`;
-  peerBubble.innerHTML = peerContent;
-  msgs.appendChild(peerBubble);
+  const pb = document.createElement('div'); pb.className = 'chat-bubble peer';
+  let pc = `<div class="bubble-name">${escHtml(peerName)}</div><div class="answer-tag">${peerR?peerR.emoji:''} ${peerR?escHtml(peerR.label):''}</div>`;
+  if (typeof peerAns==='object'&&peerAns.text) pc += `<div style="margin-top:6px">${escHtml(peerAns.text)}</div>`;
+  pb.innerHTML = pc; msgs.appendChild(pb);
 
-  if (chatMessages[index]) {
-    chatMessages[index].forEach(m => {
+  if (r.chat) {
+    r.chat.forEach(m => {
       const b = document.createElement('div');
       b.className = 'chat-bubble ' + (m.isMine ? 'mine' : 'peer');
-      b.innerHTML = `<div class="bubble-name">${m.isMine ? 'You' : escHtml(peerName)}</div>${escHtml(m.text)}<div class="bubble-time">${m.time}</div>`;
+      b.innerHTML = `<div class="bubble-name">${m.isMine?'You':escHtml(peerName)}</div>${escHtml(m.text)}<div class="bubble-time">${m.time}</div>`;
       msgs.appendChild(b);
     });
   }
@@ -1260,156 +1152,115 @@ function buildChat(index, myAns, peerAns) {
   wrap.appendChild(msgs);
   setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 0);
 
-  const inputRow = document.createElement('div');
-  inputRow.className = 'chat-input-row';
-  const chatInput = document.createElement('input');
-  chatInput.type = 'text';
-  chatInput.id = 'chatInput_' + index;
-  chatInput.placeholder = 'Type a message...';
-  chatInput.onkeydown = e => { if (e.key === 'Enter') sendChat(index); };
-  const sendBtn = document.createElement('button');
-  sendBtn.innerHTML = '&#10148;';
-  sendBtn.onclick = () => sendChat(index);
-  inputRow.appendChild(chatInput);
-  inputRow.appendChild(sendBtn);
-  wrap.appendChild(inputRow);
+  const irow = document.createElement('div'); irow.className = 'chat-input-row';
+  const ci = document.createElement('input'); ci.type='text'; ci.id='chatIn_'+roundIdx;
+  ci.placeholder = 'Type a message...';
+  ci.onkeydown = e => { if(e.key==='Enter') sendChat(roundIdx); };
+  const sb = document.createElement('button'); sb.innerHTML='&#10148;';
+  sb.onclick = () => sendChat(roundIdx);
+  irow.appendChild(ci); irow.appendChild(sb);
+  wrap.appendChild(irow);
 
   return wrap;
 }
 
-function buildReadyBarContent(bar, index) {
+function buildReadyBar(bar, roundIdx) {
   bar.innerHTML = '';
-  if (myReady[index]) {
-    bar.innerHTML = peerReady[index]
+  const r = rounds[roundIdx];
+  if (!r) return;
+  const myReady = r.ready[role];
+  const peerRole = role==='host'?'guest':'host';
+  const prReady = r.ready[peerRole];
+
+  if (myReady) {
+    bar.innerHTML = prReady
       ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
       : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
   } else {
-    const readyBtn = document.createElement('button');
-    readyBtn.textContent = 'Ready for Next ✓';
-    readyBtn.onclick = () => markReady(index);
-    bar.appendChild(readyBtn);
-    if (peerReady[index]) {
-      const note = document.createElement('div');
-      note.className = 'ready-status ready-check';
-      note.textContent = `${peerName} is ready!`;
-      note.style.flex = '1';
-      bar.appendChild(note);
+    const btn = document.createElement('button');
+    btn.textContent = allUsed() && usedQuestions[0].length+usedQuestions[1].length===totalQuestions() ? 'See Results ✓' : 'Ready for Next ✓';
+    btn.onclick = () => markReady(roundIdx);
+    bar.appendChild(btn);
+    if (prReady) {
+      const n = document.createElement('div');
+      n.className = 'ready-status ready-check';
+      n.textContent = `${peerName} is ready!`; n.style.flex='1';
+      bar.appendChild(n);
     }
   }
 }
 
-function appendChatBubble(index, msgIdx) {
-  const msgs = document.getElementById('chatMessages_' + index);
+function appendChatBubble(roundIdx, msgIdx) {
+  const msgs = document.getElementById('chatMsgs_' + roundIdx);
   if (!msgs) return;
-  const m = chatMessages[index][msgIdx];
+  const m = rounds[roundIdx].chat[msgIdx];
   if (m.isMine) return;
   const b = document.createElement('div');
   b.className = 'chat-bubble peer';
   b.innerHTML = `<div class="bubble-name">${escHtml(peerName)}</div>${escHtml(m.text)}<div class="bubble-time">${m.time}</div>`;
-  msgs.appendChild(b);
-  msgs.scrollTop = msgs.scrollHeight;
+  msgs.appendChild(b); msgs.scrollTop = msgs.scrollHeight;
 }
 
-function sendChat(index) {
-  const input = document.getElementById('chatInput_' + index);
-  if (!input || !input.value.trim()) return;
-  const text = input.value.trim();
-  input.value = '';
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  if (!chatMessages[index]) chatMessages[index] = [];
-  chatMessages[index].push({ from: myName, text, time, isMine: true });
-  publish('chat', { type: 'chat', index, from: myName, text, time });
+function sendChat(roundIdx) {
+  const inp = document.getElementById('chatIn_' + roundIdx);
+  if (!inp||!inp.value.trim()) return;
+  const text = inp.value.trim(); inp.value = '';
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  rounds[roundIdx].chat.push({ from:myName, text, time, isMine:true });
+  publish('chat', { type:'chat', round:roundIdx, from:myName, text, time });
   saveSession();
-
-  const msgs = document.getElementById('chatMessages_' + index);
+  const msgs = document.getElementById('chatMsgs_' + roundIdx);
   if (msgs) {
-    const b = document.createElement('div');
-    b.className = 'chat-bubble mine';
+    const b = document.createElement('div'); b.className='chat-bubble mine';
     b.innerHTML = `<div class="bubble-name">You</div>${escHtml(text)}<div class="bubble-time">${time}</div>`;
-    msgs.appendChild(b);
-    msgs.scrollTop = msgs.scrollHeight;
+    msgs.appendChild(b); msgs.scrollTop = msgs.scrollHeight;
   }
 }
 
-function markReady(index) {
-  myReady[index] = true;
-  publish('ready', { type: 'ready', index, from: myName });
+function markReady(roundIdx) {
+  rounds[roundIdx].ready[role] = true;
+  publish('ready', { type:'ready', round:roundIdx, role, from:myName });
   saveSession();
-  if (peerReady[index]) {
-    advanceQuestion();
+  const peerRole = role==='host'?'guest':'host';
+  if (rounds[roundIdx].ready[peerRole]) {
+    phase = 'picking'; currentRound = -1;
+    saveSession();
+    if (allUsed()) { showResults(); } else { renderGame(); }
   } else {
-    updateReadyBar(index);
+    const bar = document.getElementById('readyBar_' + roundIdx);
+    if (bar) buildReadyBar(bar, roundIdx);
   }
-}
-
-function updateReadyBar(index) {
-  const bar = document.getElementById('readyBar_' + index);
-  if (!bar) return;
-  buildReadyBarContent(bar, index);
-}
-
-function advanceQuestion() {
-  currentQ++;
-  saveSession();
-  if (currentQ >= questions.length) {
-    showResults();
-  } else {
-    renderQuestion();
-  }
-}
-
-function allPeerAnswered() {
-  for (let i = 0; i < questions.length; i++) {
-    if (peerAnswers[i] === undefined) return false;
-  }
-  return true;
-}
-
-function allMyAnswered() {
-  for (let i = 0; i < questions.length; i++) {
-    if (myAnswers[i] === undefined) return false;
-  }
-  return true;
 }
 
 function showResults() {
-  $('questionPhase').classList.add('hidden');
+  $('gamePhase').classList.add('hidden');
   $('resultsPhase').classList.remove('hidden');
-  const area = $('resultsArea');
-  area.innerHTML = '';
+  const area = $('resultsArea'); area.innerHTML = '';
 
-  if (!allPeerAnswered() || !allMyAnswered()) {
-    const waiting = document.createElement('div');
-    waiting.className = 'card';
-    const who = !allMyAnswered() ? 'you' : escHtml(peerName);
-    waiting.innerHTML = `<div class="waiting-badge" style="justify-content:center"><span class="status-dot connecting"></span> Waiting for ${who} to finish all questions...</div>`;
-    area.appendChild(waiting);
-    return;
-  }
-
-  for (let i = 0; i < questions.length; i++) {
+  rounds.forEach((r, i) => {
     const div = document.createElement('div');
     div.className = 'result-item';
+    const hostAns = r.answers.host;
+    const guestAns = r.answers.guest;
+    const hostName = role==='host' ? myName : peerName;
+    const guestName = role==='guest' ? myName : peerName;
+
     div.innerHTML = `
-      <div class="q">${i + 1}. ${escHtml(questions[i])}</div>
+      <div class="q" style="margin-bottom:8px">
+        <span style="color:var(--text-dim);font-size:0.75rem">Round ${i+1} · Set ${r.set===0?'A':'B'}</span><br>
+        ${escHtml(r.questionText)}
+      </div>
       <div class="answer-display you">
-        <div class="who">You (${escHtml(myName)})</div>
-        ${answerHtml(myAnswers[i])}
+        <div class="who">${escHtml(hostName)} (Host)</div>
+        ${answerHtml(hostAns)}
       </div>
       <div class="answer-display peer">
-        <div class="who">${escHtml(peerName)}</div>
-        ${answerHtml(peerAnswers[i])}
+        <div class="who">${escHtml(guestName)} (Guest)</div>
+        ${answerHtml(guestAns)}
       </div>
     `;
     area.appendChild(div);
-  }
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  });
 }
 
 // --- Init ---
@@ -1420,7 +1271,7 @@ function escHtml(s) {
   if (saved && (saved.roomId === urlRoom || !urlRoom)) {
     $('setupPhase').classList.add('hidden');
     $('resumePhase').classList.remove('hidden');
-    $('resumeInfo').textContent = `Room: ${saved.roomId} | ${saved.role === 'host' ? 'Host' : 'Guest'}: ${saved.myName}${saved.peerName ? ' with ' + saved.peerName : ''}`;
+    $('resumeInfo').textContent = `Room: ${saved.roomId} | ${saved.role==='host'?'Host':'Guest'}: ${saved.myName}${saved.peerName?' with '+saved.peerName:''}`;
   } else if (urlRoom) {
     roomId = urlRoom;
     $('setupPhase').classList.add('hidden');
