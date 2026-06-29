@@ -1001,6 +1001,29 @@ function buildChat(index, myAns, peerAns) {
   header.innerHTML = `Question ${index + 1} — Discussion`;
   wrap.appendChild(header);
 
+  const readyBar = document.createElement('div');
+  readyBar.className = 'ready-bar';
+  readyBar.id = 'readyBar_' + index;
+
+  if (myReady[index]) {
+    readyBar.innerHTML = peerReady[index]
+      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
+      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
+  } else {
+    const readyBtn = document.createElement('button');
+    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
+    readyBtn.onclick = () => markReady(index);
+    readyBar.appendChild(readyBtn);
+    if (peerReady[index]) {
+      const note = document.createElement('div');
+      note.className = 'ready-status ready-check';
+      note.textContent = `${peerName} is ready!`;
+      note.style.flex = '1';
+      readyBar.appendChild(note);
+    }
+  }
+  wrap.appendChild(readyBar);
+
   const msgs = document.createElement('div');
   msgs.className = 'chat-messages';
   msgs.id = 'chatMessages_' + index;
@@ -1048,29 +1071,6 @@ function buildChat(index, myAns, peerAns) {
   inputRow.appendChild(sendBtn);
   wrap.appendChild(inputRow);
 
-  const readyBar = document.createElement('div');
-  readyBar.className = 'ready-bar';
-  readyBar.id = 'readyBar_' + index;
-
-  if (myReady[index]) {
-    readyBar.innerHTML = peerReady[index]
-      ? `<div class="ready-status ready-check">Both ready — moving on...</div>`
-      : `<div class="ready-status">You're ready! Waiting for ${escHtml(peerName)}... <span class="status-dot connecting" style="display:inline-block;vertical-align:middle"></span></div>`;
-  } else {
-    const readyBtn = document.createElement('button');
-    readyBtn.textContent = currentQ < questions.length - 1 ? 'Ready for Next ✓' : 'Ready to See Results ✓';
-    readyBtn.onclick = () => markReady(index);
-    readyBar.appendChild(readyBtn);
-    if (peerReady[index]) {
-      const note = document.createElement('div');
-      note.className = 'ready-status ready-check';
-      note.textContent = `${peerName} is ready!`;
-      note.style.flex = '1';
-      readyBar.appendChild(note);
-    }
-  }
-
-  wrap.appendChild(readyBar);
   return wrap;
 }
 
