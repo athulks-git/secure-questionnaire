@@ -194,37 +194,6 @@
   .join-view { text-align: center; }
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
-  .hotness-slider-wrap { margin-top: 8px; }
-  .hotness-label-row {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
-  }
-  .hotness-emoji { font-size: 1.8rem; text-align: center; min-width: 50px; }
-  .hotness-level { font-weight: 700; font-size: 1rem; }
-  .hotness-slider {
-    -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
-    border-radius: 4px; outline: none; cursor: pointer;
-    background: linear-gradient(to right, #3498db, #2ecc71, #f1c40f, #e67e22, #e74c3c);
-  }
-  .hotness-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none; width: 28px; height: 28px;
-    border-radius: 50%; background: #fff; border: 3px solid var(--accent);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer;
-  }
-  .hotness-slider::-moz-range-thumb {
-    width: 28px; height: 28px; border-radius: 50%; background: #fff;
-    border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer;
-  }
-  .hotness-ticks {
-    display: flex; justify-content: space-between; margin-top: 6px;
-    font-size: 0.7rem; color: var(--text-dim); padding: 0 2px;
-  }
-
-  .rating-display {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 0.92rem; margin-top: 2px;
-  }
-  .rating-display .rating-emoji { font-size: 1.3rem; }
-
   .admin-toggle {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 16px; background: rgba(231, 76, 60, 0.06);
@@ -409,8 +378,6 @@
     .container { padding: 12px 0; }
     header h1 { font-size: 1.3rem; }
     .room-code { font-size: 1.4rem; }
-    .hotness-slider::-webkit-slider-thumb { width: 32px; height: 32px; }
-    .hotness-slider::-moz-range-thumb { width: 32px; height: 32px; }
     .question-card { padding: 16px; }
     .chat-container { margin: 12px -16px -16px -16px; }
   }
@@ -567,8 +534,6 @@ let isAdmin = false;
 let hostHasAdmin = false;
 let mqttReady = false;
 let wasConnected = false;
-let selectedRating = null;
-
 // Turn-based state
 let rounds = [];        // [{set, index, pickerRole, answers:{host:{},guest:{}}, chat:[], ready:{host:false,guest:false}}]
 let currentRound = -1;  // index into rounds, -1 = picking phase
@@ -579,13 +544,6 @@ let peerPeek = {};
 let pickTimer = null;
 let pickDeadline = 0;
 
-const HOTNESS = [
-  { value: 1, emoji: '\u{2744}\u{FE0F}', label: 'Ice Cold' },
-  { value: 2, emoji: '\u{1F32C}\u{FE0F}', label: 'Cool' },
-  { value: 3, emoji: '\u{1F321}\u{FE0F}', label: 'Warm' },
-  { value: 4, emoji: '\u{1F525}', label: 'Hot' },
-  { value: 5, emoji: '\u{1F525}\u{1F525}', label: 'On Fire' },
-];
 
 function $(id) { return document.getElementById(id); }
 
@@ -799,7 +757,7 @@ function handleMessage(suffix, msg) {
   }
 
   if (suffix === 'peek' && isAdmin && msg.from !== myName) {
-    peerPeek[msg.round] = { rating: msg.rating, text: msg.text || '' };
+    peerPeek[msg.round] = { text: msg.text || '' };
     renderGame();
   }
 
@@ -1137,57 +1095,25 @@ function renderAnsweringPhase(area) {
       phase = 'chatting'; saveSession();
       div.appendChild(buildChat(currentRound, respondentAns));
     } else {
-      selectedRating = 3;
-      const wrap = document.createElement('div');
-      wrap.className = 'hotness-slider-wrap';
-
-      const labelRow = document.createElement('div');
-      labelRow.className = 'hotness-label-row';
-      const emojiSpan = document.createElement('span');
-      emojiSpan.className = 'hotness-emoji';
-      emojiSpan.id = 'hotnessEmoji';
-      const levelSpan = document.createElement('span');
-      levelSpan.className = 'hotness-level';
-      levelSpan.id = 'hotnessLevel';
-      labelRow.appendChild(emojiSpan);
-      labelRow.appendChild(levelSpan);
-      wrap.appendChild(labelRow);
-
-      const slider = document.createElement('input');
-      slider.type = 'range'; slider.min = '1'; slider.max = '5'; slider.value = '3';
-      slider.className = 'hotness-slider'; slider.id = 'hotnessSlider';
-      slider.oninput = () => {
-        selectedRating = parseInt(slider.value);
-        updateHotnessLabel(selectedRating);
-        if (role === 'guest' && hostHasAdmin) {
-          publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:'', from:myName });
-        }
-      };
-      wrap.appendChild(slider);
-
-      const ticks = document.createElement('div');
-      ticks.className = 'hotness-ticks';
-      HOTNESS.forEach(h => { const t = document.createElement('span'); t.textContent = h.emoji; ticks.appendChild(t); });
-      wrap.appendChild(ticks);
-
-      updateHotnessLabel(3);
-      div.appendChild(wrap);
-
       const ta = document.createElement('textarea');
       ta.id = 'ansText';
-      ta.placeholder = 'Add a note (optional)...';
-      ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
-      if (role === 'guest' && hostHasAdmin) {
-        ta.oninput = () => {
-          publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
-        };
-      }
-      div.appendChild(ta);
+      ta.placeholder = 'Type your answer...';
+      ta.style.cssText = 'width:100%;margin-top:8px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:80px;font-family:inherit';
 
       const btn = document.createElement('button');
       btn.textContent = 'Submit';
       btn.style.cssText = 'margin-top:10px;width:100%';
+      btn.disabled = true;
       btn.onclick = () => submitAnswer();
+
+      ta.oninput = () => {
+        btn.disabled = !ta.value.trim();
+        if (role === 'guest' && hostHasAdmin) {
+          publish('peek', { type:'peek', round:currentRound, text:ta.value, from:myName });
+        }
+      };
+
+      div.appendChild(ta);
       div.appendChild(btn);
     }
   }
@@ -1213,47 +1139,28 @@ function renderChattingPhase(area) {
 }
 
 function submitAnswer() {
-  if (selectedRating === null || selectedRating === undefined) return;
+  const text = ($('ansText') || {}).value || '';
+  if (!text.trim()) return;
   const r = rounds[currentRound];
   const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
-  const text = ($('ansText') || {}).value || '';
-  const ans = { rating: selectedRating, text: text.trim() };
+  const ans = { text: text.trim() };
   r.answers[respondentRole] = ans;
   phase = 'chatting';
   publish('answer', { type:'answer', round:currentRound, role:respondentRole, answer:ans, from:myName });
-  selectedRating = null;
   saveSession();
   renderGame();
 }
 
-function updateHotnessLabel(val) {
-  const h = HOTNESS.find(x => x.value === val) || HOTNESS[2];
-  const el = document.getElementById('hotnessEmoji');
-  const lv = document.getElementById('hotnessLevel');
-  if (el) el.textContent = h.emoji;
-  if (lv) { lv.textContent = h.label; lv.style.color = ['#3498db','#2ecc71','#f1c40f','#e67e22','#e74c3c'][val-1]; }
-}
-
-function ratingHtml(v) {
-  const val = (typeof v === 'object') ? v.rating : v;
-  const h = HOTNESS.find(x => x.value === val);
-  if (!h) return escHtml(String(val));
-  return `<div class="rating-display"><span class="rating-emoji">${h.emoji}</span> ${escHtml(h.label)}</div>`;
-}
-
 function answerHtml(a) {
   if (!a) return '';
-  const o = (typeof a === 'object') ? a : { rating: a, text: '' };
-  let h = ratingHtml(o.rating);
-  if (o.text) h += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(o.text)}"</div>`;
-  return h;
+  const t = (typeof a === 'object') ? (a.text || '') : String(a);
+  if (!t) return '';
+  return `<div style="font-size:0.9rem;color:var(--text);line-height:1.5">${escHtml(t)}</div>`;
 }
 
 function peekHtml(p) {
-  if (!p) return '';
-  let h = ratingHtml(p.rating);
-  if (p.text) h += `<div style="margin-top:6px;font-size:0.85rem;color:var(--text-dim);font-style:italic">"${escHtml(p.text)}"</div>`;
-  return h;
+  if (!p || !p.text) return '';
+  return `<div style="font-size:0.9rem;color:var(--text-dim);font-style:italic">"${escHtml(p.text)}"</div>`;
 }
 
 function buildChat(roundIdx, respondentAns) {
@@ -1283,12 +1190,11 @@ function buildChat(roundIdx, respondentAns) {
   msgs.id = 'chatMsgs_' + roundIdx;
 
   // Show the respondent's answer as the first bubble
-  const aR = HOTNESS.find(x => x.value === (typeof respondentAns==='object'?respondentAns.rating:respondentAns));
+  const ansText = (typeof respondentAns === 'object') ? (respondentAns.text || '') : String(respondentAns || '');
   const ab = document.createElement('div');
   ab.className = 'chat-bubble ' + (iAmRespondent ? 'mine' : 'peer');
-  let ac = `<div class="bubble-name">${respondentDisplayName}'s answer</div><div class="answer-tag">${aR?aR.emoji:''} ${aR?escHtml(aR.label):''}</div>`;
-  if (typeof respondentAns==='object'&&respondentAns.text) ac += `<div style="margin-top:6px">${escHtml(respondentAns.text)}</div>`;
-  ab.innerHTML = ac; msgs.appendChild(ab);
+  ab.innerHTML = `<div class="bubble-name">${respondentDisplayName}'s answer</div><div style="margin-top:4px">${escHtml(ansText)}</div>`;
+  msgs.appendChild(ab);
 
   if (r.chat) {
     r.chat.forEach(m => {
