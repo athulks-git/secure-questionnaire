@@ -729,6 +729,10 @@ function handleMessage(suffix, msg) {
     enterGame(); saveSession();
   }
 
+  if (suffix === 'joinreq' && role === 'host') {
+    publish('room', { type:'room', questions1, questions2, hostName:myName, adminEnabled:isAdmin });
+  }
+
   if (suffix === 'join' && role === 'host') {
     peerName = msg.name; connected = true; wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
@@ -836,12 +840,20 @@ async function joinRoom() {
   try {
     await connectMQTT();
     setStatus('connecting', 'Waiting for room data...');
-    setTimeout(() => {
-      if (!connected) {
-        showError('joinError', 'Room data not received. Check passphrase.');
+    // Request room data from host (retained message may not arrive on public brokers)
+    publish('joinreq', { type:'joinreq', name:myName });
+    let retries = 0;
+    const retryInterval = setInterval(() => {
+      if (connected) { clearInterval(retryInterval); return; }
+      retries++;
+      if (retries >= 5) {
+        clearInterval(retryInterval);
+        showError('joinError', 'Room data not received. Check passphrase and make sure the host is online.');
         $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
+        return;
       }
-    }, 15000);
+      publish('joinreq', { type:'joinreq', name:myName });
+    }, 3000);
   } catch (err) {
     $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
     showError('joinError', 'Failed: ' + err.message);
