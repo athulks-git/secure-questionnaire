@@ -967,37 +967,36 @@ function renderPickingPhase(area) {
     area.appendChild(customDiv);
   }
 
-  // Question sets (clickable for picker, read-only for non-picker)
-  [0, 1].forEach(setIdx => {
-    const qs = setIdx === 0 ? questions1 : questions2;
-    const setDiv = document.createElement('div');
-    setDiv.className = 'q-set';
-    const title = document.createElement('div');
-    title.className = 'q-set-title ' + (setIdx === 0 ? 'set-a' : 'set-b');
-    title.innerHTML = `${setIdx === 0 ? '&#128309;' : '&#128995;'} Set ${setIdx === 0 ? 'A' : 'B'} — ${qs.length} questions`;
-    setDiv.appendChild(title);
+  // Picker sees Set A (to pick from), non-picker sees Set B (read-only)
+  const showSet = isMyTurn() ? 0 : 1;
+  const qs = showSet === 0 ? questions1 : questions2;
+  const setDiv = document.createElement('div');
+  setDiv.className = 'q-set';
+  const title = document.createElement('div');
+  title.className = 'q-set-title ' + (showSet === 0 ? 'set-a' : 'set-b');
+  title.innerHTML = `${showSet === 0 ? '&#128309;' : '&#128995;'} Set ${showSet === 0 ? 'A' : 'B'} — ${qs.length} questions`;
+  setDiv.appendChild(title);
 
-    const list = document.createElement('div');
-    list.className = 'q-list';
+  const list = document.createElement('div');
+  list.className = 'q-list';
 
-    qs.forEach((q, qi) => {
-      const used = usedQuestions[setIdx].includes(qi);
-      const item = document.createElement('div');
-      item.className = 'q-item' + (used ? ' used disabled' : '') + (!isMyTurn() ? ' disabled' : '');
-      item.innerHTML = `
-        <div class="q-num">${used ? '&#10003;' : qi + 1}</div>
-        <div class="q-label">${escHtml(q)}</div>
-        ${used ? '<div class="q-done">Done</div>' : ''}
-      `;
-      if (!used && isMyTurn()) {
-        item.onclick = () => pickQuestion(setIdx, qi);
-      }
-      list.appendChild(item);
-    });
-
-    setDiv.appendChild(list);
-    area.appendChild(setDiv);
+  qs.forEach((q, qi) => {
+    const used = usedQuestions[showSet].includes(qi);
+    const item = document.createElement('div');
+    item.className = 'q-item' + (used ? ' used disabled' : '') + (!isMyTurn() ? ' disabled' : '');
+    item.innerHTML = `
+      <div class="q-num">${used ? '&#10003;' : qi + 1}</div>
+      <div class="q-label">${escHtml(q)}</div>
+      ${used ? '<div class="q-done">Done</div>' : ''}
+    `;
+    if (!used && isMyTurn()) {
+      item.onclick = () => pickQuestion(showSet, qi);
+    }
+    list.appendChild(item);
   });
+
+  setDiv.appendChild(list);
+  area.appendChild(setDiv);
 }
 
 function startPickTimer() {
@@ -1034,12 +1033,14 @@ function updateTimerDisplay() {
 
 function autoPickQuestion() {
   const unused = [];
-  [0, 1].forEach(setIdx => {
-    const qs = setIdx === 0 ? questions1 : questions2;
-    qs.forEach((q, qi) => {
-      if (!usedQuestions[setIdx].includes(qi)) unused.push({ set: setIdx, index: qi });
-    });
+  questions1.forEach((q, qi) => {
+    if (!usedQuestions[0].includes(qi)) unused.push({ set: 0, index: qi });
   });
+  if (unused.length === 0) {
+    questions2.forEach((q, qi) => {
+      if (!usedQuestions[1].includes(qi)) unused.push({ set: 1, index: qi });
+    });
+  }
   if (unused.length === 0) return;
   const pick = unused[Math.floor(Math.random() * unused.length)];
   pickQuestion(pick.set, pick.index);
