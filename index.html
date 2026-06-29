@@ -216,15 +216,15 @@
   .join-view .join-icon { font-size: 3rem; margin-bottom: 12px; }
 
   .rating-bar {
-    display: flex; flex-direction: column; gap: 8px; margin-top: 4px;
+    display: flex; gap: 12px; margin-top: 4px;
   }
 
   .rating-btn {
-    display: flex; align-items: center; gap: 12px;
-    width: 100%; padding: 14px 16px; background: var(--surface2);
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 16px; background: var(--surface2);
     border: 2px solid var(--border); border-radius: 10px;
-    color: var(--text-dim); font-size: 0.88rem; font-weight: 500;
-    cursor: pointer; text-align: left; transition: all 0.2s;
+    color: var(--text-dim); font-size: 1rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
   }
 
   .rating-btn .rating-emoji { font-size: 1.5rem; flex-shrink: 0; }
@@ -233,11 +233,8 @@
 
   .rating-btn.selected { color: var(--text); }
 
-  .rating-btn.r1.selected { border-color: var(--red); background: rgba(231, 76, 60, 0.12); }
-  .rating-btn.r2.selected { border-color: var(--orange); background: rgba(243, 156, 18, 0.12); }
-  .rating-btn.r3.selected { border-color: #f1c40f; background: rgba(241, 196, 15, 0.12); }
-  .rating-btn.r4.selected { border-color: #27ae60; background: rgba(39, 174, 96, 0.12); }
-  .rating-btn.r5.selected { border-color: var(--green); background: rgba(46, 204, 113, 0.12); }
+  .rating-btn.r0.selected { border-color: var(--red); background: rgba(231, 76, 60, 0.15); }
+  .rating-btn.r1.selected { border-color: var(--green); background: rgba(46, 204, 113, 0.15); }
 
   .rating-display {
     display: inline-flex; align-items: center; gap: 8px;
@@ -302,8 +299,8 @@
     .container { padding: 12px; }
     header h1 { font-size: 1.3rem; }
     .room-code { font-size: 1.4rem; }
-    .rating-bar { gap: 6px; }
-    .rating-btn { padding: 12px 14px; font-size: 0.82rem; gap: 10px; }
+    .rating-bar { gap: 8px; }
+    .rating-btn { padding: 14px 10px; font-size: 0.9rem; gap: 8px; }
     .rating-btn .rating-emoji { font-size: 1.3rem; }
     .question-card { padding: 16px; }
   }
@@ -435,11 +432,8 @@ let hostHasAdmin = false;
 let peerPeek = {};
 
 const RATINGS = [
-  { value: 1, emoji: '😐', label: 'Not interested' },
-  { value: 2, emoji: '🤔', label: 'Slightly' },
-  { value: 3, emoji: '🙂', label: 'Moderate' },
-  { value: 4, emoji: '😊', label: 'Interested' },
-  { value: 5, emoji: '🤩', label: 'Very interested' },
+  { value: 0, emoji: '👎', label: 'Not Interested' },
+  { value: 1, emoji: '👍', label: 'Interested' },
 ];
 
 function $(id) { return document.getElementById(id); }
@@ -772,18 +766,12 @@ function renderQuestion() {
         if (role === 'guest' && hostHasAdmin) {
           publish('peek', { type: 'peek', index: i, rating: r.value, from: myName });
         }
+        submitAnswer(i);
       };
       bar.appendChild(rb);
     });
 
-    const btn = document.createElement('button');
-    btn.textContent = 'Submit Rating';
-    btn.style.marginTop = '12px';
-    btn.style.width = '100%';
-    btn.onclick = () => submitAnswer(i);
-
     div.appendChild(bar);
-    div.appendChild(btn);
 
     if (isAdmin && peerAns !== undefined) {
       const peerDiv = document.createElement('div');
