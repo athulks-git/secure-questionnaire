@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure Questionnaire</title>
+<title>The Question Game</title>
 <script src="https://unpkg.com/mqtt@5.10.4/dist/mqtt.min.js"></script>
 <style>
   :root {
@@ -173,9 +173,6 @@
   }
   .copy-feedback.show { opacity: 1; }
 
-  .passphrase-row { display: flex; gap: 8px; align-items: center; }
-  .passphrase-row input { flex: 1; }
-  .passphrase-row button { padding: 10px 14px; flex-shrink: 0; }
 
   .info-box {
     padding: 12px 16px;
@@ -386,9 +383,9 @@
 <body>
 <div class="container">
   <header>
-    <div class="shield">&#128274;</div>
-    <h1>Secure Questionnaire</h1>
-    <p>End-to-end encrypted &middot; No server sees your data</p>
+    <div class="shield">&#128172;</div>
+    <h1>The Question Game</h1>
+    <p>Take turns asking each other questions</p>
   </header>
 
   <div class="reconnect-banner" id="reconnectBanner">
@@ -400,7 +397,7 @@
     <div class="status-dot" id="statusDot"></div>
     <span id="statusText">Not connected</span>
     <span class="admin-badge hidden" id="adminBadge">Admin</span>
-    <span style="margin-left:auto" class="tag e2e" id="e2eTag" style="display:none">E2E Encrypted</span>
+    <span style="margin-left:auto" class="tag e2e" id="e2eTag" style="display:none"></span>
   </div>
 
   <!-- HOST SETUP -->
@@ -410,17 +407,8 @@
       <input type="text" id="userName" placeholder="Enter your display name" maxlength="30">
     </div>
 
-    <div class="card">
-      <h2><span class="step">2</span> Shared Passphrase</h2>
-      <p>Both participants must use the same passphrase.</p>
-      <div class="passphrase-row">
-        <input type="password" id="passphrase" placeholder="Enter a shared secret passphrase">
-        <button onclick="toggleVis('passphrase','passToggle')" class="secondary" id="passToggle">Show</button>
-      </div>
-    </div>
-
     <div class="card" id="uploadCard">
-      <h2><span class="step">3</span> Upload Questionnaires</h2>
+      <h2><span class="step">2</span> Upload Questionnaires</h2>
       <p>Upload two text files — one for each player. Each person picks questions from these to ask the other.</p>
 
       <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -477,14 +465,10 @@
     <div class="card join-view">
       <div class="join-icon">&#128279;</div>
       <h2 style="justify-content:center">You've been invited!</h2>
-      <p style="text-align:center">Enter your name and the shared passphrase to join.</p>
+      <p style="text-align:center">Enter your name to join the game.</p>
       <input type="text" id="guestName" placeholder="Enter your display name" maxlength="30" style="margin-bottom:10px">
-      <div class="passphrase-row">
-        <input type="password" id="guestPassphrase" placeholder="Enter the shared passphrase">
-        <button onclick="toggleVis('guestPassphrase','guestPassToggle')" class="secondary" id="guestPassToggle">Show</button>
-      </div>
       <div class="btn-row">
-        <button onclick="joinRoom()" id="joinBtn">Join Session</button>
+        <button onclick="joinRoom()" id="joinBtn">Join Game</button>
       </div>
       <div id="joinError"></div>
     </div>
@@ -527,7 +511,6 @@ let myName = '';
 let peerName = '';
 let questions1 = [];
 let questions2 = [];
-let cryptoKey = null;
 let roomId = null;
 let connected = false;
 let isAdmin = false;
@@ -591,9 +574,6 @@ async function resumeSession() {
   roomId = d.roomId;
 
   $('resumePhase').classList.add('hidden');
-  const pass = prompt('Enter your passphrase to rejoin:');
-  if (!pass) { clearSavedSession(); return; }
-  cryptoKey = await deriveKey(pass);
   setStatus('connecting', 'Reconnecting...');
   try {
     await connectMQTT();
@@ -603,7 +583,7 @@ async function resumeSession() {
     publish('sync', { type: 'sync', from: myName, role, rounds, currentRound, whoseTurn, phase, usedQuestions });
     connected = true; wasConnected = true;
     setStatus('connected', peerName ? `Connected to ${peerName}` : 'Connected');
-    $('e2eTag').style.display = '';
+
     if (isAdmin) $('adminBadge').classList.remove('hidden');
     enterGame();
   } catch (err) {
@@ -621,7 +601,6 @@ function generateRoomCode() {
   return c;
 }
 function getRoomFromURL() { return new URLSearchParams(window.location.search).get('room'); }
-function toggleVis(iid, bid) { const i=$(iid),b=$(bid); i.type=i.type==='password'?'text':'password'; b.textContent=i.type==='password'?'Show':'Hide'; }
 function toggleAdmin() { isAdmin=!isAdmin; $('adminToggle').classList.toggle('active',isAdmin); }
 function flashField(id) { const e=$(id); e.focus(); e.style.borderColor='var(--red)'; setTimeout(()=>e.style.borderColor='',1500); }
 function escHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
@@ -667,21 +646,9 @@ function parseQuestions(text) {
 setupFileDrop('fileDrop1', 'fileInput1', 'fileLabel1', 0);
 setupFileDrop('fileDrop2', 'fileInput2', 'fileLabel2', 1);
 
-// --- Crypto ---
-async function deriveKey(p) {
-  const e=new TextEncoder(), k=await crypto.subtle.importKey('raw',e.encode(p),'PBKDF2',false,['deriveKey']);
-  return crypto.subtle.deriveKey({name:'PBKDF2',salt:e.encode('secure-questionnaire-v2'),iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
-}
-async function encrypt(text) {
-  const e=new TextEncoder(),iv=crypto.getRandomValues(new Uint8Array(12));
-  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,e.encode(text));
-  const b=new Uint8Array(iv.length+ct.byteLength); b.set(iv); b.set(new Uint8Array(ct),iv.length);
-  return btoa(String.fromCharCode(...b));
-}
-async function decrypt(b64) {
-  const r=Uint8Array.from(atob(b64),c=>c.charCodeAt(0)),iv=r.slice(0,12),ct=r.slice(12);
-  return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv},cryptoKey,ct));
-}
+// --- Encoding (plain JSON, no encryption) ---
+function encode(text) { return btoa(unescape(encodeURIComponent(text))); }
+function decode(b64) { return decodeURIComponent(escape(atob(b64))); }
 
 // --- MQTT ---
 function topic(s) { return `sq/${roomId}/${s}`; }
@@ -703,9 +670,9 @@ function connectMQTT() {
       });
     });
     client.on('error', err => { if(!resolved){resolved=true;reject(err);} });
-    client.on('message', async (t, msg) => {
+    client.on('message', (t, msg) => {
       const s=t.replace(`sq/${roomId}/`,''); let m;
-      try { m=JSON.parse(await decrypt(msg.toString())); } catch(e) { console.warn('Decrypt failed for', s, e.message); return; }
+      try { m=JSON.parse(decode(msg.toString())); } catch(e) { console.warn('Decode failed for', s, e.message); return; }
       handleMessage(s, m);
     });
     client.on('offline', () => { if(wasConnected){$('reconnectBanner').classList.add('show');setStatus('connecting','Reconnecting...');} });
@@ -713,9 +680,9 @@ function connectMQTT() {
   });
 }
 
-async function publish(s, o) {
-  if (!client||!client.connected) return;
-  const payload = await encrypt(JSON.stringify(o));
+function publish(s, o) {
+  if (!client||!client.connected) return Promise.resolve();
+  const payload = encode(JSON.stringify(o));
   return new Promise(resolve => {
     client.publish(topic(s), payload, { qos:1, retain:s==='room' }, () => resolve());
   });
@@ -727,7 +694,7 @@ async function handleMessage(suffix, msg) {
     peerName = msg.hostName; hostHasAdmin = msg.adminEnabled || false;
     connected = true; wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
-    $('e2eTag').style.display = '';
+
     publish('join', { type:'join', name:myName });
     enterGame(); saveSession();
   }
@@ -739,7 +706,7 @@ async function handleMessage(suffix, msg) {
   if (suffix === 'join' && role === 'host') {
     peerName = msg.name; connected = true; wasConnected = true;
     setStatus('connected', `Connected to ${peerName}`);
-    $('e2eTag').style.display = '';
+
     enterGame(); saveSession();
   }
 
@@ -806,9 +773,7 @@ async function handleMessage(suffix, msg) {
 async function createRoom() {
   if (!questions1.length || !questions2.length) return;
   if (!$('userName').value.trim()) { flashField('userName'); return; }
-  if (!$('passphrase').value.trim()) { flashField('passphrase'); return; }
   role = 'host'; myName = $('userName').value.trim();
-  cryptoKey = await deriveKey($('passphrase').value);
   roomId = generateRoomCode();
   $('createBtn').disabled = true; $('createBtn').textContent = 'Creating...';
   setStatus('connecting', 'Connecting...');
@@ -835,9 +800,7 @@ function copyLink() {
 // --- Guest ---
 async function joinRoom() {
   if (!$('guestName').value.trim()) { flashField('guestName'); return; }
-  if (!$('guestPassphrase').value.trim()) { flashField('guestPassphrase'); return; }
   role = 'guest'; myName = $('guestName').value.trim();
-  cryptoKey = await deriveKey($('guestPassphrase').value);
   $('joinBtn').disabled = true; $('joinBtn').textContent = 'Connecting...';
   setStatus('connecting', 'Connecting...');
   try {
@@ -849,7 +812,7 @@ async function joinRoom() {
       if (connected) return;
       attempts++;
       if (attempts > 10) {
-        showError('joinError', 'Room data not received. Check passphrase and make sure the host is online.');
+        showError('joinError', 'Room data not received. Make sure the host is online.');
         $('joinBtn').disabled = false; $('joinBtn').textContent = 'Join Session';
         return;
       }
