@@ -379,6 +379,22 @@
     margin-bottom: 12px;
   }
 
+  .timer-bar {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 12px 16px; margin-bottom: 12px; text-align: center;
+    background: var(--surface); font-size: 0.85rem; font-weight: 600;
+  }
+  .timer-bar .timer-icon { font-size: 1.1rem; }
+  .timer-bar .timer-text { font-variant-numeric: tabular-nums; }
+  .timer-bar.urgent { color: var(--red); background: rgba(231, 76, 60, 0.08); }
+  .timer-bar.normal { color: var(--text-dim); }
+
+  .browse-hint {
+    padding: 12px 16px; margin-bottom: 12px; text-align: center;
+    background: rgba(0, 148, 255, 0.06); border: 1px solid rgba(0, 148, 255, 0.15);
+    font-size: 0.82rem; color: var(--text-dim); line-height: 1.5;
+  }
+
   @media (max-width: 480px) {
     .container { padding: 12px 0; }
     header h1 { font-size: 1.3rem; }
@@ -551,6 +567,8 @@ let whoseTurn = 'host';  // who picks next
 let phase = 'picking';   // 'picking' | 'answering' | 'chatting'
 let usedQuestions = { 0: [], 1: [] }; // which questions have been used from each set
 let peerPeek = {};
+let pickTimer = null;
+let pickDeadline = 0;
 
 const RATINGS = [
   { value: 0, emoji: '\u{1F44E}', label: 'Not Interested' },
@@ -787,7 +805,7 @@ function handleMessage(suffix, msg) {
       saveSession();
       const rd = rounds[msg.round];
       if (rd.ready.host && rd.ready.guest) {
-        phase = 'picking'; currentRound = -1;
+        phase = 'picking'; currentRound = -1; pickDeadline = 0;
         if (allUsed()) { showResults(); } else { renderGame(); }
       } else {
         renderGame();
@@ -903,10 +921,53 @@ function renderPickingPhase(area) {
     banner.textContent = 'Your turn — pick a question to ask ' + (peerName || 'the other player');
   } else {
     banner.className = 'turn-banner their-turn';
-    banner.textContent = (peerName || 'Other player') + ' is choosing a question...';
+    banner.textContent = (peerName || 'Other player') + ' is choosing a question for you...';
   }
   area.appendChild(banner);
 
+  // Timer
+  const timerEl = document.createElement('div');
+  timerEl.className = 'timer-bar normal';
+  timerEl.id = 'pickTimerBar';
+  timerEl.innerHTML = `<span class="timer-icon">&#9201;</span> <span class="timer-text" id="pickTimerText">2:00</span>`;
+  area.appendChild(timerEl);
+  startPickTimer();
+
+  if (!isMyTurn()) {
+    const hint = document.createElement('div');
+    hint.className = 'browse-hint';
+    hint.innerHTML = `${escHtml(peerName || 'The other player')} is choosing a question for you. Feel free to browse the questions below while you wait.`;
+    area.appendChild(hint);
+  }
+
+  // Custom question input at top (picker only)
+  if (isMyTurn()) {
+    const customDiv = document.createElement('div');
+    customDiv.className = 'q-set';
+    const ctitle = document.createElement('div');
+    ctitle.className = 'q-set-title';
+    ctitle.style.color = 'var(--orange)';
+    ctitle.innerHTML = '&#9997;&#65039; Ask your own question';
+    customDiv.appendChild(ctitle);
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.id = 'customQ';
+    inp.placeholder = 'Type a custom question...';
+    inp.style.cssText = 'flex:1';
+    inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
+    const btn = document.createElement('button');
+    btn.textContent = 'Ask';
+    btn.onclick = () => { if (inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
+    row.appendChild(inp);
+    row.appendChild(btn);
+    customDiv.appendChild(row);
+    area.appendChild(customDiv);
+  }
+
+  // Question sets (clickable for picker, read-only for non-picker)
   [0, 1].forEach(setIdx => {
     const qs = setIdx === 0 ? questions1 : questions2;
     const setDiv = document.createElement('div');
@@ -937,35 +998,55 @@ function renderPickingPhase(area) {
     setDiv.appendChild(list);
     area.appendChild(setDiv);
   });
+}
 
-  if (isMyTurn()) {
-    const customDiv = document.createElement('div');
-    customDiv.className = 'q-set';
-    const ctitle = document.createElement('div');
-    ctitle.className = 'q-set-title';
-    ctitle.style.color = 'var(--orange)';
-    ctitle.innerHTML = '&#9997;&#65039; Ask your own question';
-    customDiv.appendChild(ctitle);
-
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:8px';
-    const inp = document.createElement('input');
-    inp.type = 'text';
-    inp.id = 'customQ';
-    inp.placeholder = 'Type a custom question...';
-    inp.style.cssText = 'flex:1';
-    inp.onkeydown = e => { if (e.key === 'Enter' && inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
-    const btn = document.createElement('button');
-    btn.textContent = 'Ask';
-    btn.onclick = () => { if (inp.value.trim()) pickCustomQuestion(inp.value.trim()); };
-    row.appendChild(inp);
-    row.appendChild(btn);
-    customDiv.appendChild(row);
-    area.appendChild(customDiv);
+function startPickTimer() {
+  clearPickTimer();
+  if (!pickDeadline || pickDeadline < Date.now()) {
+    pickDeadline = Date.now() + 120000;
   }
+  updateTimerDisplay();
+  pickTimer = setInterval(() => {
+    const remaining = Math.max(0, pickDeadline - Date.now());
+    updateTimerDisplay();
+    if (remaining <= 0) {
+      clearPickTimer();
+      if (isMyTurn()) autoPickQuestion();
+    }
+  }, 250);
+}
+
+function clearPickTimer() {
+  if (pickTimer) { clearInterval(pickTimer); pickTimer = null; }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('pickTimerText');
+  const bar = document.getElementById('pickTimerBar');
+  if (!el || !bar) return;
+  const remaining = Math.max(0, pickDeadline - Date.now());
+  const secs = Math.ceil(remaining / 1000);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  bar.className = 'timer-bar ' + (secs <= 30 ? 'urgent' : 'normal');
+}
+
+function autoPickQuestion() {
+  const unused = [];
+  [0, 1].forEach(setIdx => {
+    const qs = setIdx === 0 ? questions1 : questions2;
+    qs.forEach((q, qi) => {
+      if (!usedQuestions[setIdx].includes(qi)) unused.push({ set: setIdx, index: qi });
+    });
+  });
+  if (unused.length === 0) return;
+  const pick = unused[Math.floor(Math.random() * unused.length)];
+  pickQuestion(pick.set, pick.index);
 }
 
 function pickQuestion(setIdx, qIdx) {
+  clearPickTimer(); pickDeadline = 0;
   const qs = setIdx === 0 ? questions1 : questions2;
   const r = {
     set: setIdx, index: qIdx, pickerRole: role,
@@ -985,6 +1066,7 @@ function pickQuestion(setIdx, qIdx) {
 }
 
 function pickCustomQuestion(text) {
+  clearPickTimer(); pickDeadline = 0;
   const r = {
     set: -1, index: -1, pickerRole: role,
     questionText: text,
@@ -1254,7 +1336,7 @@ function markReady(roundIdx) {
   saveSession();
   const peerRole = role==='host'?'guest':'host';
   if (rounds[roundIdx].ready[peerRole]) {
-    phase = 'picking'; currentRound = -1;
+    phase = 'picking'; currentRound = -1; pickDeadline = 0;
     saveSession();
     if (allUsed()) { showResults(); } else { renderGame(); }
   } else {
