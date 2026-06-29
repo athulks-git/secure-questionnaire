@@ -763,8 +763,7 @@ function handleMessage(suffix, msg) {
     if (currentRound >= 0 && rounds[currentRound]) {
       rounds[currentRound].answers[msg.role] = msg.answer;
       delete peerPeek[currentRound];
-      const r = rounds[currentRound];
-      if (r.answers.host && r.answers.guest) { phase = 'chatting'; }
+      phase = 'chatting';
       saveSession(); renderGame();
     }
   }
@@ -962,91 +961,80 @@ function pickQuestion(setIdx, qIdx) {
 function renderAnsweringPhase(area) {
   const r = rounds[currentRound];
   if (!r) return;
-  const myAns = r.answers[role];
-  const peerRole = role === 'host' ? 'guest' : 'host';
-  const peerAns = r.answers[peerRole];
+  const iAmPicker = r.pickerRole === role;
+  const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
+  const respondentAns = r.answers[respondentRole];
 
   const div = document.createElement('div');
   div.className = 'question-card';
 
-  const pickerName = r.pickerRole === role ? 'You' : escHtml(peerName);
+  const pickerName = iAmPicker ? 'You' : escHtml(peerName);
+  const respondentName = iAmPicker ? escHtml(peerName) : 'You';
   div.innerHTML = `
     <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
     <div class="question-text">${escHtml(r.questionText)}</div>
   `;
 
-  if (myAns === undefined) {
-    selectedRating = null;
-    const bar = document.createElement('div');
-    bar.className = 'rating-bar';
-
-    RATINGS.forEach(rt => {
-      const rb = document.createElement('button');
-      rb.className = `rating-btn r${rt.value}`;
-      rb.innerHTML = `<span class="rating-emoji">${rt.emoji}</span><span>${rt.label}</span>`;
-      rb.onclick = () => {
-        selectedRating = rt.value;
-        bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
-        rb.classList.add('selected');
-        if (role === 'guest' && hostHasAdmin) {
-          publish('peek', { type:'peek', round:currentRound, rating:rt.value, text:'', from:myName });
-        }
-      };
-      bar.appendChild(rb);
-    });
-    div.appendChild(bar);
-
-    const ta = document.createElement('textarea');
-    ta.id = 'ansText';
-    ta.placeholder = 'Add a note (optional)...';
-    ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
-    if (role === 'guest' && hostHasAdmin) {
-      ta.oninput = () => {
-        if (selectedRating !== null) publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
-      };
-    }
-    div.appendChild(ta);
-
-    const btn = document.createElement('button');
-    btn.textContent = 'Submit';
-    btn.style.cssText = 'margin-top:10px;width:100%';
-    btn.onclick = () => submitAnswer();
-    div.appendChild(btn);
-
-    if (isAdmin && peerAns) {
-      const pd = document.createElement('div');
-      pd.className = 'answer-display peer';
-      pd.style.marginTop = '12px';
-      pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Submitted</span></div>${answerHtml(peerAns)}`;
-      div.appendChild(pd);
-    } else if (isAdmin && peerPeek[currentRound]) {
-      const pd = document.createElement('div');
-      pd.className = 'answer-display peer';
-      pd.style.marginTop = '12px';
-      pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[currentRound])}`;
-      div.appendChild(pd);
-    }
-  } else {
-    const md = document.createElement('div');
-    md.className = 'answer-display you';
-    md.innerHTML = `<div class="who">You (${escHtml(myName)})</div>${answerHtml(myAns)}`;
-    div.appendChild(md);
-
-    if (peerAns) {
+  if (iAmPicker) {
+    // Picker doesn't answer — just waits for the respondent
+    if (respondentAns) {
       phase = 'chatting'; saveSession();
-      div.appendChild(buildChat(currentRound, myAns, peerAns));
+      div.appendChild(buildChat(currentRound, respondentAns));
     } else {
       if (isAdmin && peerPeek[currentRound]) {
         const pd = document.createElement('div');
-        pd.className = 'answer-display peer';
-        pd.innerHTML = `<div class="who">${escHtml(peerName)} <span class="admin-badge" style="margin-left:6px">Live</span></div>${peekHtml(peerPeek[currentRound])}`;
+        pd.className = 'peek-box';
+        pd.innerHTML = `<div class="peek-label">${escHtml(peerName)} — Live</div>${peekHtml(peerPeek[currentRound])}`;
         div.appendChild(pd);
       } else {
         const b = document.createElement('div');
         b.className = 'waiting-badge';
-        b.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName||'peer')}...`;
+        b.innerHTML = `<span class="status-dot connecting"></span> Waiting for ${escHtml(peerName||'peer')} to answer...`;
         div.appendChild(b);
       }
+    }
+  } else {
+    // Respondent answers
+    if (respondentAns) {
+      phase = 'chatting'; saveSession();
+      div.appendChild(buildChat(currentRound, respondentAns));
+    } else {
+      selectedRating = null;
+      const bar = document.createElement('div');
+      bar.className = 'rating-bar';
+
+      RATINGS.forEach(rt => {
+        const rb = document.createElement('button');
+        rb.className = `rating-btn r${rt.value}`;
+        rb.innerHTML = `<span class="rating-emoji">${rt.emoji}</span><span>${rt.label}</span>`;
+        rb.onclick = () => {
+          selectedRating = rt.value;
+          bar.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+          rb.classList.add('selected');
+          if (role === 'guest' && hostHasAdmin) {
+            publish('peek', { type:'peek', round:currentRound, rating:rt.value, text:'', from:myName });
+          }
+        };
+        bar.appendChild(rb);
+      });
+      div.appendChild(bar);
+
+      const ta = document.createElement('textarea');
+      ta.id = 'ansText';
+      ta.placeholder = 'Add a note (optional)...';
+      ta.style.cssText = 'width:100%;margin-top:12px;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:16px;resize:vertical;min-height:60px;font-family:inherit';
+      if (role === 'guest' && hostHasAdmin) {
+        ta.oninput = () => {
+          if (selectedRating !== null) publish('peek', { type:'peek', round:currentRound, rating:selectedRating, text:ta.value, from:myName });
+        };
+      }
+      div.appendChild(ta);
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Submit';
+      btn.style.cssText = 'margin-top:10px;width:100%';
+      btn.onclick = () => submitAnswer();
+      div.appendChild(btn);
     }
   }
 
@@ -1056,9 +1044,8 @@ function renderAnsweringPhase(area) {
 function renderChattingPhase(area) {
   const r = rounds[currentRound];
   if (!r) return;
-  const myAns = r.answers[role];
-  const peerRole = role === 'host' ? 'guest' : 'host';
-  const peerAns = r.answers[peerRole];
+  const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
+  const respondentAns = r.answers[respondentRole];
 
   const div = document.createElement('div');
   div.className = 'question-card';
@@ -1067,16 +1054,19 @@ function renderChattingPhase(area) {
     <div class="question-num">Round ${currentRound + 1} · Picked by ${pickerName} · Set ${r.set === 0 ? 'A' : 'B'}</div>
     <div class="question-text">${escHtml(r.questionText)}</div>
   `;
-  div.appendChild(buildChat(currentRound, myAns, peerAns));
+  div.appendChild(buildChat(currentRound, respondentAns));
   area.appendChild(div);
 }
 
 function submitAnswer() {
   if (selectedRating === null) return;
+  const r = rounds[currentRound];
+  const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
   const text = ($('ansText') || {}).value || '';
   const ans = { rating: selectedRating, text: text.trim() };
-  rounds[currentRound].answers[role] = ans;
-  publish('answer', { type:'answer', round:currentRound, role, answer:ans, from:myName });
+  r.answers[respondentRole] = ans;
+  phase = 'chatting';
+  publish('answer', { type:'answer', round:currentRound, role:respondentRole, answer:ans, from:myName });
   selectedRating = null;
   saveSession();
   renderGame();
@@ -1104,8 +1094,11 @@ function peekHtml(p) {
   return h;
 }
 
-function buildChat(roundIdx, myAns, peerAns) {
+function buildChat(roundIdx, respondentAns) {
   const r = rounds[roundIdx];
+  const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
+  const iAmRespondent = role === respondentRole;
+  const respondentDisplayName = iAmRespondent ? 'You' : escHtml(peerName);
   const wrap = document.createElement('div');
   wrap.className = 'chat-container';
   wrap.id = 'chatWrap_' + roundIdx;
@@ -1127,18 +1120,13 @@ function buildChat(roundIdx, myAns, peerAns) {
   msgs.className = 'chat-messages';
   msgs.id = 'chatMsgs_' + roundIdx;
 
-  const myR = RATINGS.find(x => x.value === (typeof myAns==='object'?myAns.rating:myAns));
-  const peerR = RATINGS.find(x => x.value === (typeof peerAns==='object'?peerAns.rating:peerAns));
-
-  const mb = document.createElement('div'); mb.className = 'chat-bubble mine';
-  let mc = `<div class="bubble-name">You</div><div class="answer-tag">${myR?myR.emoji:''} ${myR?escHtml(myR.label):''}</div>`;
-  if (typeof myAns==='object'&&myAns.text) mc += `<div style="margin-top:6px">${escHtml(myAns.text)}</div>`;
-  mb.innerHTML = mc; msgs.appendChild(mb);
-
-  const pb = document.createElement('div'); pb.className = 'chat-bubble peer';
-  let pc = `<div class="bubble-name">${escHtml(peerName)}</div><div class="answer-tag">${peerR?peerR.emoji:''} ${peerR?escHtml(peerR.label):''}</div>`;
-  if (typeof peerAns==='object'&&peerAns.text) pc += `<div style="margin-top:6px">${escHtml(peerAns.text)}</div>`;
-  pb.innerHTML = pc; msgs.appendChild(pb);
+  // Show the respondent's answer as the first bubble
+  const aR = RATINGS.find(x => x.value === (typeof respondentAns==='object'?respondentAns.rating:respondentAns));
+  const ab = document.createElement('div');
+  ab.className = 'chat-bubble ' + (iAmRespondent ? 'mine' : 'peer');
+  let ac = `<div class="bubble-name">${respondentDisplayName}'s answer</div><div class="answer-tag">${aR?aR.emoji:''} ${aR?escHtml(aR.label):''}</div>`;
+  if (typeof respondentAns==='object'&&respondentAns.text) ac += `<div style="margin-top:6px">${escHtml(respondentAns.text)}</div>`;
+  ab.innerHTML = ac; msgs.appendChild(ab);
 
   if (r.chat) {
     r.chat.forEach(m => {
@@ -1240,23 +1228,19 @@ function showResults() {
   rounds.forEach((r, i) => {
     const div = document.createElement('div');
     div.className = 'result-item';
-    const hostAns = r.answers.host;
-    const guestAns = r.answers.guest;
-    const hostName = role==='host' ? myName : peerName;
-    const guestName = role==='guest' ? myName : peerName;
+    const respondentRole = r.pickerRole === 'host' ? 'guest' : 'host';
+    const respondentAns = r.answers[respondentRole];
+    const pickerRoleName = r.pickerRole === role ? myName : peerName;
+    const respondentRoleName = respondentRole === role ? myName : peerName;
 
     div.innerHTML = `
       <div class="q" style="margin-bottom:8px">
-        <span style="color:var(--text-dim);font-size:0.75rem">Round ${i+1} · Set ${r.set===0?'A':'B'}</span><br>
+        <span style="color:var(--text-dim);font-size:0.75rem">Round ${i+1} · Set ${r.set===0?'A':'B'} · Asked by ${escHtml(pickerRoleName)}</span><br>
         ${escHtml(r.questionText)}
       </div>
-      <div class="answer-display you">
-        <div class="who">${escHtml(hostName)} (Host)</div>
-        ${answerHtml(hostAns)}
-      </div>
       <div class="answer-display peer">
-        <div class="who">${escHtml(guestName)} (Guest)</div>
-        ${answerHtml(guestAns)}
+        <div class="who">${escHtml(respondentRoleName)}'s Answer</div>
+        ${answerHtml(respondentAns)}
       </div>
     `;
     area.appendChild(div);
